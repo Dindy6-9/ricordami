@@ -59,7 +59,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .transcript-box.listening{border-color:var(--danger);animation:borderPulse 1s ease-in-out infinite}
 @keyframes borderPulse{0%,100%{border-color:var(--danger)}50%{border-color:rgba(255,79,79,.3)}}
 .clear-text{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1}
-.clear-text:hover{color:var(--text)}
 .action-row{display:flex;gap:8px}
 .mic-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
 .mic-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -68,6 +67,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .add-btn{background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 18px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .add-btn:hover{background:#d4eb3e}
 .add-btn:disabled{opacity:.3;cursor:default}
+.sw-status{font-size:11px;text-align:center;padding:6px;color:var(--text-muted);background:var(--surface2);border-radius:6px;margin-bottom:8px}
+.sw-status.ok{color:var(--done)}
+.sw-status.warn{color:#ffaa44}
 /* NOTE */
 .notes-area{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 14px}
 .notes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -84,7 +86,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .notes-mic-btn.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:recGlow 1s ease-in-out infinite}
 .notes-copy-btn{background:var(--note);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:11px 16px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .notes-copy-btn:hover{opacity:.85}
-/* TOAST */
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;color:var(--accent);z-index:999;max-width:340px;width:90%;text-align:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.note-toast{border-color:var(--note);color:var(--note)}
@@ -113,6 +114,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
 
     <div class="bottom-panel">
+      <div id="swStatus" class="sw-status">⏳ Inizializzazione background…</div>
+
       <div class="time-mode-row">
         <button class="mode-btn active" id="modeTimer" onclick="setMode('timer')">⏱ Tra poco</button>
         <button class="mode-btn" id="modeDate" onclick="setMode('date')">📅 Data e ora</button>
@@ -177,18 +180,47 @@ let isRecordingNotes = false;
 let recognition = null;
 let reminders = [];
 let nextId = 1;
+let swReady = false;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const hasSpeech = !!SpeechRecognition;
 
-// TABS
+// ===== SERVICE WORKER =====
+async function initSW() {
+  if (!('serviceWorker' in navigator)) {
+    setSwStatus(false, 'Service Worker non supportato — i timer potrebbero fermarsi in background');
+    return;
+  }
+  try {
+    const reg = await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.ready;
+    swReady = true;
+    setSwStatus(true, '✅ Notifiche attive anche in background');
+  } catch(e) {
+    setSwStatus(false, '⚠️ Background limitato — tieni Chrome aperto');
+  }
+}
+
+function setSwStatus(ok, msg) {
+  const el = document.getElementById('swStatus');
+  el.textContent = msg;
+  el.className = 'sw-status ' + (ok ? 'ok' : 'warn');
+}
+
+function sendToSW(data) {
+  if (!swReady || !navigator.serviceWorker.controller) return false;
+  navigator.serviceWorker.controller.postMessage(data);
+  return true;
+}
+
+// ===== TABS =====
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='reminder')||(i===1&&tab==='notes')));
   document.getElementById('tab-reminder').classList.toggle('active',tab==='reminder');
   document.getElementById('tab-notes').classList.toggle('active',tab==='notes');
 }
 
-// MODALITA' TEMPO
+// ===== MODALITA' TEMPO =====
 function setMode(mode) {
   currentMode = mode;
   document.getElementById('modeTimer').classList.toggle('active',mode==='timer');
@@ -213,7 +245,7 @@ function selectTime(btn) {
   selectedMinutes = parseInt(btn.dataset.min);
 }
 
-// MICROFONO
+// ===== MICROFONO =====
 function toggleMic(target) {
   if(!hasSpeech){showToast('Microfono non supportato. Usa Chrome su Android.');return;}
   if(target==='reminder'){
@@ -256,8 +288,8 @@ function startMic(target) {
       setTranscript(final||interim,!!(final||interim));
     } else {
       const base = document.getElementById('notesText').dataset.base||'';
-      const appended = (base&&(final||interim)) ? base+' '+(final||interim) : base+(final||interim);
-      document.getElementById('notesText').value = appended;
+      const sep = base ? ' ' : '';
+      document.getElementById('notesText').value = base + sep + (final||interim);
       updateNotesCount();
     }
   };
@@ -293,7 +325,7 @@ function startMic(target) {
 
 function stopMic(){if(recognition){try{recognition.stop();}catch(e){}}}
 
-// PROMEMORIA TESTO
+// ===== PROMEMORIA TESTO =====
 function setTranscript(text,hasContent){
   const span=document.getElementById('transcriptText');
   const box=document.getElementById('transcriptBox');
@@ -313,7 +345,7 @@ function boxClick(e){
   if(input!==null&&input.trim()) setTranscript(input.trim(),true);
 }
 
-// AGGIUNGI PROMEMORIA
+// ===== AGGIUNGI PROMEMORIA =====
 function addReminder(){
   const text=document.getElementById('transcriptText').textContent.trim();
   if(!text||text==='Cosa devi fare?') return;
@@ -330,26 +362,35 @@ function addReminder(){
     if(ms<=0){showToast('⚠️ La data è nel passato!');return;}
     label=target.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'2-digit'})+' alle '+timeVal;
   }
+
   const id=nextId++;
   const fireAt=Date.now()+ms;
   const reminder={id,text,label,fireAt,timerId:null};
-  reminder.timerId=setTimeout(()=>fireReminder(id),ms);
+
+  // Invia al Service Worker (notifica anche in background)
+  const sentToSW = sendToSW({ type:'SCHEDULE', id, text, fireAt });
+
+  // Timer locale come fallback (funziona se l'app è aperta)
+  reminder.timerId = setTimeout(()=>fireReminderLocal(id), ms);
+
   reminders.push(reminder);
   renderList();
   clearText();
-  showToast('⏱ Ricorderò '+(currentMode==='timer'?'tra '+label:'il '+label));
+
+  const bgMsg = sentToSW ? ' (attivo in background ✅)' : ' (tieni Chrome aperto)';
+  showToast('⏱ Ricorderò '+(currentMode==='timer'?'tra '+label:'il '+label)+bgMsg);
 }
 
-function fireReminder(id){
+function fireReminderLocal(id){
+  // Se il SW ha già sparato la notifica non facciamo nulla di duplicato
+  // Mostriamo solo il banner in-app
   const r=reminders.find(x=>x.id===id);
   if(!r) return;
-  if(Notification.permission==='granted'){
-    new Notification('🔔 Ricordami',{
-      body:r.text,requireInteraction:true,
-      icon:'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔔</text></svg>'
-    });
-  }
-  showToast('🔔 '+r.text,6000);
+  showToast('🔔 '+r.text, 6000);
+  removeCard(id);
+}
+
+function removeCard(id){
   const card=document.getElementById('card-'+id);
   if(card){
     card.classList.add('done-anim');
@@ -360,11 +401,8 @@ function fireReminder(id){
 function deleteReminder(id){
   const r=reminders.find(x=>x.id===id);
   if(r&&r.timerId) clearTimeout(r.timerId);
-  const card=document.getElementById('card-'+id);
-  if(card){
-    card.classList.add('done-anim');
-    setTimeout(()=>{reminders=reminders.filter(x=>x.id!==id);renderList();},300);
-  }
+  sendToSW({type:'CANCEL', id});
+  removeCard(id);
 }
 
 function renderList(){
@@ -399,7 +437,7 @@ setInterval(()=>{
   });
 },1000);
 
-// APPUNTI
+// ===== APPUNTI =====
 function updateNotesCount(){
   document.getElementById('notesCount').textContent=document.getElementById('notesText').value.length+' caratteri';
 }
@@ -417,9 +455,9 @@ function copyNotes(){
   navigator.clipboard.writeText(text).then(()=>showToast('📋 Appunti copiati!',2000,true));
 }
 
-// NOTIFICHE
+// ===== NOTIFICHE =====
 async function requestNotifications(){
-  if(!('Notification' in window)){showToast('Apri questa pagina in Chrome per le notifiche.');return;}
+  if(!('Notification' in window)){showToast('Apri in Chrome per le notifiche.');return;}
   const result=await Notification.requestPermission();
   updateNotifBtn(result);
   if(result==='granted') showToast('✅ Notifiche abilitate!');
@@ -431,7 +469,7 @@ function updateNotifBtn(perm){
   else{btn.textContent='🔔 Abilita notifiche';btn.classList.remove('granted');}
 }
 
-// UTILS
+// ===== UTILS =====
 function formatMin(m){
   if(m<60) return m+' minut'+(m===1?'o':'i');
   const h=m/60;return h+(h===1?' ora':' ore');
@@ -446,12 +484,13 @@ function showToast(msg,duration=3000,noteStyle=false){
 }
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// INIT
+// ===== INIT =====
 if('Notification' in window) updateNotifBtn(Notification.permission);
 if(!hasSpeech){
   document.getElementById('micBtn').style.display='none';
   document.getElementById('notesMicBtn').style.display='none';
 }
+initSW();
 </script>
 </body>
 </html>
