@@ -221,21 +221,31 @@ function updateNtfyStatus(ok) {
 async function sendNtfyDelayed(text, delaySeconds) {
   if (!ntfyChannel) return;
   try {
-    const headers = {
-      'Title': '🔔 Ricordami',
-      'Priority': 'high',
-      'Tags': 'bell'
-    };
-    // X-Delay: ntfy.sh supporta delay in secondi o stringhe tipo "5m", "2h"
-    if (delaySeconds > 0) {
-      headers['X-Delay'] = String(Math.round(delaySeconds)) + 's';
-    }
-    const resp = await fetch('https://ntfy.sh/' + ntfyChannel, {
+    // Manda subito notifica di conferma
+    const fireTime = new Date(Date.now() + delaySeconds * 1000);
+    const orario = fireTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+    const giorno = fireTime.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'});
+    const oggi = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'});
+    const quando = giorno === oggi ? 'oggi alle ' + orario : giorno + ' alle ' + orario;
+
+    // Notifica di conferma immediata
+    await fetch('https://ntfy.sh/' + ntfyChannel, {
       method: 'POST',
-      headers: headers,
-      body: text
+      headers: { 'Title': '📌 Promemoria impostato', 'Priority': 'low', 'Tags': 'white_check_mark' },
+      body: '⏰ ' + quando + ' — ' + text
     });
-    if (!resp.ok) console.log('Ntfy error:', resp.status);
+
+    // Notifica reale al momento giusto tramite setTimeout
+    // (funziona se Chrome rimane in background — Android lo permette)
+    if (delaySeconds > 0) {
+      setTimeout(async () => {
+        await fetch('https://ntfy.sh/' + ntfyChannel, {
+          method: 'POST',
+          headers: { 'Title': '🔔 Ricordami!', 'Priority': 'urgent', 'Tags': 'bell,rotating_light' },
+          body: text
+        });
+      }, delaySeconds * 1000);
+    }
   } catch(e) {
     console.log('Ntfy fetch error:', e);
   }
@@ -294,12 +304,20 @@ function setMode(mode) {
 }
 
 function initDatetime() {
+  const savedDate = localStorage.getItem('ricordami_date');
+  const savedTime = localStorage.getItem('ricordami_time');
   const now = new Date();
   now.setMinutes(now.getMinutes()+10);
-  if(!document.getElementById('dateInput').value)
-    document.getElementById('dateInput').value = now.toISOString().slice(0,10);
-  if(!document.getElementById('timeInput').value)
-    document.getElementById('timeInput').value = now.toTimeString().slice(0,5);
+  const di = document.getElementById('dateInput');
+  const ti = document.getElementById('timeInput');
+  di.value = savedDate || now.toISOString().slice(0,10);
+  ti.value = savedTime || now.toTimeString().slice(0,5);
+  // Salva ogni volta che l'utente cambia data/ora
+  if(!di.dataset.listenerAdded) {
+    di.addEventListener('change', e => localStorage.setItem('ricordami_date', e.target.value));
+    ti.addEventListener('change', e => localStorage.setItem('ricordami_time', e.target.value));
+    di.dataset.listenerAdded = '1';
+  }
 }
 
 function selectTime(btn) {
