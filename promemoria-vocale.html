@@ -43,14 +43,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .card-del{background:none;border:none;color:var(--text-muted);font-size:15px;cursor:pointer;padding:2px 4px;border-radius:6px;line-height:1;transition:color .2s;flex-shrink:0}
 .card-del:hover{color:var(--danger)}
 .bottom-panel{background:var(--surface);border-top:1px solid var(--border);padding:12px 16px 20px;flex-shrink:0}
-/* NTFY SETUP */
-.ntfy-bar{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ntfy-bar{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .ntfy-bar.ok{border-color:var(--done)}
-.ntfy-bar.warn{border-color:#ffaa44}
 .ntfy-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;min-width:0}
 .ntfy-input::placeholder{color:var(--text-muted)}
 .ntfy-save{background:var(--accent);border:none;border-radius:6px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;white-space:nowrap}
-.ntfy-status{font-size:11px;color:var(--text-muted)}
+.ntfy-status{font-size:11px;color:var(--text-muted);margin-bottom:8px;padding:0 2px}
 .ntfy-status.ok{color:var(--done)}
 .time-mode-row{display:flex;gap:6px;margin-bottom:10px}
 .mode-btn{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;padding:7px 4px;cursor:pointer;transition:all .15s;text-align:center}
@@ -106,7 +104,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="tab" onclick="switchTab('notes')">📝 Appunti</div>
   </div>
 
-  <!-- TAB PROMEMORIA -->
   <div class="tab-content active" id="tab-reminder">
     <div class="list-area" id="listArea">
       <div class="empty-state" id="emptyState">
@@ -115,16 +112,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       </div>
     </div>
     <div class="bottom-panel">
-
-      <!-- NTFY BAR -->
       <div class="ntfy-bar" id="ntfyBar">
-        <span style="font-size:16px">🔔</span>
-        <input class="ntfy-input" id="ntfyInput" placeholder="Il tuo canale Ntfy (es. ricordami-dindy)" />
+        <span style="font-size:15px">🔔</span>
+        <input class="ntfy-input" id="ntfyInput" placeholder="Nome canale Ntfy (es. ricordami-dindy)"/>
         <button class="ntfy-save" onclick="saveNtfy()">Salva</button>
       </div>
-      <div class="ntfy-status" id="ntfyStatus">⚠️ Configura Ntfy per notifiche anche a schermo spento</div>
+      <div class="ntfy-status" id="ntfyStatus">⚠️ Inserisci il canale Ntfy per notifiche garantite</div>
 
-      <div class="time-mode-row" style="margin-top:8px">
+      <div class="time-mode-row">
         <button class="mode-btn active" id="modeTimer" onclick="setMode('timer')">⏱ Tra poco</button>
         <button class="mode-btn" id="modeDate" onclick="setMode('date')">📅 Data e ora</button>
       </div>
@@ -155,7 +150,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
   </div>
 
-  <!-- TAB APPUNTI -->
   <div class="tab-content" id="tab-notes">
     <div class="notes-area">
       <div class="notes-header">
@@ -195,7 +189,9 @@ function saveNtfy() {
   ntfyChannel = val;
   localStorage.setItem('ricordami_ntfy', val);
   updateNtfyStatus(true);
-  showToast('✅ Canale Ntfy salvato!');
+  // Manda notifica di test per confermare che funziona
+  sendNtfyDelayed('✅ Ricordami collegato! Le notifiche arriveranno qui.', 0);
+  showToast('✅ Canale Ntfy salvato! Controlla Ntfy per la conferma.');
 }
 
 function loadNtfy() {
@@ -215,22 +211,33 @@ function updateNtfyStatus(ok) {
     status.className = 'ntfy-status ok';
     status.textContent = '✅ Ntfy attivo — notifiche garantite anche a schermo spento';
   } else {
-    bar.className = 'ntfy-bar warn';
+    bar.className = 'ntfy-bar';
     status.className = 'ntfy-status';
-    status.textContent = '⚠️ Configura Ntfy per notifiche anche a schermo spento';
+    status.textContent = '⚠️ Inserisci il canale Ntfy per notifiche garantite';
   }
 }
 
-async function sendNtfy(text) {
+// Manda messaggio a Ntfy con delay in secondi (0 = subito)
+async function sendNtfyDelayed(text, delaySeconds) {
   if (!ntfyChannel) return;
   try {
-    await fetch('https://ntfy.sh/' + ntfyChannel, {
+    const headers = {
+      'Title': '🔔 Ricordami',
+      'Priority': 'high',
+      'Tags': 'bell'
+    };
+    // X-Delay: ntfy.sh supporta delay in secondi o stringhe tipo "5m", "2h"
+    if (delaySeconds > 0) {
+      headers['X-Delay'] = String(Math.round(delaySeconds)) + 's';
+    }
+    const resp = await fetch('https://ntfy.sh/' + ntfyChannel, {
       method: 'POST',
-      headers: { 'Title': '🔔 Ricordami', 'Priority': 'high', 'Tags': 'bell' },
+      headers: headers,
       body: text
     });
+    if (!resp.ok) console.log('Ntfy error:', resp.status);
   } catch(e) {
-    console.log('Ntfy error:', e);
+    console.log('Ntfy fetch error:', e);
   }
 }
 
@@ -248,13 +255,11 @@ function loadReminders() {
     const now = Date.now();
     saved.forEach(r => {
       if (r.fireAt > now) {
+        // Ripristina timer locale come fallback visivo
         r.timerId = setTimeout(() => fireReminderLocal(r.id), r.fireAt - now);
         reminders.push(r);
-      } else {
-        // Scaduto mentre eravamo chiusi — manda Ntfy ora
-        sendNtfy('⏰ (in ritardo) ' + r.text);
-        showToast('🔔 Perso mentre eri via: ' + r.text, 6000);
       }
+      // Se scaduto mentre eravamo chiusi, Ntfy l'ha già mandato con il delay
     });
   } catch(e) {}
 }
@@ -404,9 +409,12 @@ function boxClick(e){
 function addReminder(){
   const text=document.getElementById('transcriptText').textContent.trim();
   if(!text||text==='Cosa devi fare?') return;
-  let ms,label;
+
+  let ms, label, delaySeconds;
+
   if(currentMode==='timer'){
     ms=selectedMinutes*60*1000;
+    delaySeconds=selectedMinutes*60;
     label=formatMin(selectedMinutes);
   } else {
     const dateVal=document.getElementById('dateInput').value;
@@ -415,28 +423,36 @@ function addReminder(){
     const target=new Date(dateVal+'T'+timeVal);
     ms=target.getTime()-Date.now();
     if(ms<=0){showToast('⚠️ La data è nel passato!');return;}
+    delaySeconds=Math.round(ms/1000);
     label=target.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'2-digit'})+' alle '+timeVal;
   }
+
   const id=nextId++;
   const fireAt=Date.now()+ms;
   const reminder={id,text,label,fireAt,timerId:null};
+
+  // Timer locale (fallback visivo quando app è aperta)
   reminder.timerId=setTimeout(()=>fireReminderLocal(id),ms);
+
+  // 🔑 CHIAVE: manda subito a Ntfy con X-Delay
+  // Ntfy.sh gestisce il timer lato server — arriva anche con phone spento!
+  sendNtfyDelayed(text, delaySeconds);
+
   reminders.push(reminder);
   saveReminders();
   renderList();
   clearText();
-  showToast('⏱ Ricorderò '+(currentMode==='timer'?'tra '+label:'il '+label));
+
+  const ntfyMsg = ntfyChannel ? ' — Ntfy lo ricorderà ✅' : ' — installa Ntfy per notifiche garantite';
+  showToast('⏱ Ricorderò tra '+label+ntfyMsg);
 }
 
 function fireReminderLocal(id){
   const r=reminders.find(x=>x.id===id);
   if(!r) return;
-  // Notifica browser
   if(Notification.permission==='granted'){
     new Notification('🔔 Ricordami',{body:r.text,requireInteraction:true});
   }
-  // Notifica Ntfy (arriva anche a schermo spento!)
-  sendNtfy(r.text);
   showToast('🔔 '+r.text,6000);
   reminders=reminders.filter(x=>x.id!==id);
   saveReminders();
@@ -508,7 +524,6 @@ async function requestNotifications(){
   const result=await Notification.requestPermission();
   updateNotifBtn(result);
   if(result==='granted') showToast('✅ Notifiche browser abilitate!');
-  else showToast('Non abilitate — usa Ntfy per le notifiche.');
 }
 function updateNotifBtn(perm){
   const btn=document.getElementById('notifBtn');
@@ -522,7 +537,7 @@ function formatMin(m){
   const h=m/60;return h+(h===1?' ora':' ore');
 }
 let toastTimer=null;
-function showToast(msg,duration=3000,noteStyle=false){
+function showToast(msg,duration=3500,noteStyle=false){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast'+(noteStyle?' note-toast':'');
   t.classList.add('show');
