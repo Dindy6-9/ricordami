@@ -84,7 +84,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab('notes')">📝 Appunti</div>
-    <div class="tab" onclick="switchTab('quick')">⚡ Note veloci</div>
+    <div class="tab" onclick="switchTab('quick')">⚡ Lavoro</div>
+    <div class="tab" onclick="switchTab('personal')">👤 Personale</div>
   </div>
 
   <!-- TAB APPUNTI -->
@@ -130,6 +131,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       </div>
     </div>
   </div>
+  <!-- TAB PERSONALE -->
+  <div class="tab-content" id="tab-personal">
+    <div class="quick-area">
+      <div class="quick-list" id="personalList">
+        <div class="quick-empty" id="personalEmpty">
+          <div class="quick-empty-icon">👤</div>
+          <div>Note personali<br>Ditta e premi Aggiungi</div>
+        </div>
+      </div>
+      <div class="quick-preview" id="personalPreview">
+        <span id="personalPreviewText">Cosa vuoi annotare?</span>
+        <button class="preview-clear" id="personalClearBtn" onclick="clearPreviewP()">✕</button>
+      </div>
+      <div class="quick-row">
+        <button class="mic-btn" id="personalMicBtn" onclick="toggleMic('personal')">
+          <span>🎙️</span><span id="personalMicLabel">Parla</span>
+        </button>
+        <button class="add-btn" id="addBtnP" onclick="addNoteP()" disabled>Aggiungi</button>
+      </div>
+      <div class="quick-actions">
+        <button class="export-btn" onclick="exportNotesP()">📄 Scarica lista</button>
+        <button class="clearall-btn" onclick="clearAllNotesP()">🗑 Svuota</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -139,13 +165,19 @@ const hasSpeech = !!SpeechRecognition;
 let recognition = null;
 let isRecordingNotes = false;
 let isRecordingQuick = false;
+let isRecordingPersonal = false;
 let quickNotes = []; // [{text, done}]
+let personalNotes = []; // [{text, done}]
 
 // ===== TABS =====
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active',(i===0&&tab==='notes')||(i===1&&tab==='quick')));
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active',
+      (i===0&&tab==='notes')||(i===1&&tab==='quick')||(i===2&&tab==='personal'));
+  });
   document.getElementById('tab-notes').classList.toggle('active', tab==='notes');
   document.getElementById('tab-quick').classList.toggle('active', tab==='quick');
+  document.getElementById('tab-personal').classList.toggle('active', tab==='personal');
 }
 
 // ===== MICROFONO =====
@@ -153,8 +185,10 @@ function toggleMic(target) {
   if (!hasSpeech) { showToast('Usa Chrome su Android'); return; }
   if (target === 'notes') {
     if (isRecordingNotes) stopMic(); else startMic('notes');
-  } else {
+  } else if (target === 'quick') {
     if (isRecordingQuick) stopMic(); else startMic('quick');
+  } else {
+    if (isRecordingPersonal) stopMic(); else startMic('personal');
   }
 }
 
@@ -170,12 +204,18 @@ function startMic(target) {
       isRecordingNotes = true;
       document.getElementById('notesMicBtn').classList.add('recording');
       document.getElementById('notesMicLabel').textContent = 'Fermo';
-    } else {
+    } else if (target === 'quick') {
       isRecordingQuick = true;
       document.getElementById('quickMicBtn').classList.add('recording');
       document.getElementById('quickMicLabel').textContent = 'Fermo';
       document.getElementById('quickPreview').classList.add('listening');
       setPreview('Sto ascoltando…', false);
+    } else {
+      isRecordingPersonal = true;
+      document.getElementById('personalMicBtn').classList.add('recording');
+      document.getElementById('personalMicLabel').textContent = 'Fermo';
+      document.getElementById('personalPreview').classList.add('listening');
+      setPreviewP('Sto ascoltando…', false);
     }
   };
 
@@ -194,14 +234,19 @@ function startMic(target) {
       if (final) { ta.dataset.base = ta.value; saveNotes(); }
       updateNotesCount();
       ta.scrollTop = ta.scrollHeight;
-    } else {
-      // Per le note veloci mostra interim ma salva solo final
+    } else if (target === 'quick') {
       if (final) {
         setPreview(final, true);
       } else if (interim) {
-        // Mostra solo interim visivamente, non sovrascrive
         document.getElementById('quickPreviewText').textContent = interim;
         document.getElementById('quickPreview').classList.add('has-text');
+      }
+    } else {
+      if (final) {
+        setPreviewP(final, true);
+      } else if (interim) {
+        document.getElementById('personalPreviewText').textContent = interim;
+        document.getElementById('personalPreview').classList.add('has-text');
       }
     }
   };
@@ -214,13 +259,20 @@ function startMic(target) {
       const ta = document.getElementById('notesText');
       ta.dataset.base = ta.value;
       saveNotes();
-    } else {
+    } else if (target === 'quick') {
       isRecordingQuick = false;
       document.getElementById('quickMicBtn').classList.remove('recording');
       document.getElementById('quickMicLabel').textContent = 'Parla';
       document.getElementById('quickPreview').classList.remove('listening');
       const txt = document.getElementById('quickPreviewText').textContent;
       if (!txt || txt === 'Sto ascoltando…') setPreview('', false);
+    } else {
+      isRecordingPersonal = false;
+      document.getElementById('personalMicBtn').classList.remove('recording');
+      document.getElementById('personalMicLabel').textContent = 'Parla';
+      document.getElementById('personalPreview').classList.remove('listening');
+      const txt = document.getElementById('personalPreviewText').textContent;
+      if (!txt || txt === 'Sto ascoltando…') setPreviewP('', false);
     }
   };
 
@@ -416,6 +468,114 @@ function clearAllNotes() {
   }
 }
 
+// ===== PERSONALE =====
+function setPreviewP(text, hasContent) {
+  const span = document.getElementById('personalPreviewText');
+  const clearBtn = document.getElementById('personalClearBtn');
+  const addBtn = document.getElementById('addBtnP');
+  span.textContent = text || 'Cosa vuoi annotare?';
+  document.getElementById('personalPreview').classList.toggle('has-text', hasContent && !!text);
+  clearBtn.style.display = (hasContent && text) ? 'block' : 'none';
+  addBtn.disabled = !(hasContent && text && text.trim().length > 0);
+}
+
+function clearPreviewP() { setPreviewP('', false); }
+
+function addNoteP() {
+  const text = document.getElementById('personalPreviewText').textContent.trim();
+  if (!text || text === 'Cosa vuoi annotare?') return;
+  personalNotes.push({ text, done: false });
+  savePersonal();
+  renderPersonal();
+  setPreviewP('', false);
+}
+
+function toggleDoneP(idx) {
+  if (idx < 0 || idx >= personalNotes.length) return;
+  personalNotes[idx].done = !personalNotes[idx].done;
+  savePersonal();
+  const item = document.querySelector('#personalList .note-item[data-idx="'+idx+'"]');
+  if (item) {
+    const box = item.querySelector('.check-box');
+    if (personalNotes[idx].done) {
+      item.classList.add('done'); box.classList.add('checked');
+    } else {
+      item.classList.remove('done'); box.classList.remove('checked');
+    }
+  }
+}
+
+function editNoteP(idx) {
+  const newText = prompt('Modifica nota:', personalNotes[idx].text);
+  if (newText !== null && newText.trim()) {
+    personalNotes[idx].text = newText.trim();
+    savePersonal();
+    renderPersonal();
+  }
+}
+
+function renderPersonal() {
+  const list = document.getElementById('personalList');
+  const empty = document.getElementById('personalEmpty');
+  list.innerHTML = '';
+  if (personalNotes.length === 0) { list.appendChild(empty); return; }
+  personalNotes.forEach((note, i) => {
+    const item = document.createElement('div');
+    item.className = 'note-item' + (note.done ? ' done' : '');
+    item.dataset.idx = i;
+    const num = document.createElement('span');
+    num.className = 'note-num'; num.textContent = (i+1) + '.';
+    const txt = document.createElement('span');
+    txt.className = 'note-text'; txt.textContent = note.text;
+    txt.addEventListener('click', () => editNoteP(i));
+    const wrap = document.createElement('div');
+    wrap.className = 'check-wrap';
+    const box = document.createElement('div');
+    box.className = 'check-box' + (note.done ? ' checked' : '');
+    wrap.appendChild(box);
+    wrap.addEventListener('click', () => toggleDoneP(i));
+    item.appendChild(num); item.appendChild(txt); item.appendChild(wrap);
+    list.appendChild(item);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+function exportNotesP() {
+  if (!personalNotes.length) { showToast('Nessuna nota da esportare.'); return; }
+  const data = new Date().toLocaleDateString('it-IT');
+  const ora = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+  const righe = personalNotes.map((n, i) => `
+    <tr>
+      <td style="padding:8px 12px;font-weight:700;color:#888;font-size:14px">${i+1}.</td>
+      <td style="padding:8px 12px;font-size:15px;color:#222">${n.text}</td>
+      <td style="padding:8px 12px;text-align:center;font-size:18px">${n.done ? '🟢' : '⬜'}</td>
+    </tr>`).join('');
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Note personali — ${data}</title>
+<style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px}h1{font-size:22px;color:#111}.sub{font-size:13px;color:#888;margin-bottom:24px}table{width:100%;border-collapse:collapse}tr:nth-child(even){background:#f9f9f9}tr{border-bottom:1px solid #eee}.footer{margin-top:24px;font-size:12px;color:#aaa;text-align:center}</style>
+</head><body><h1>👤 Note personali</h1><div class="sub">Esportate il ${data} alle ${ora}</div>
+<table><tr style="background:#f0f0f0"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Nota</th><th style="padding:8px 12px">Fatto</th></tr>${righe}</table>
+<div class="footer">Generato da Appunti Vocali</div></body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'note-personali-' + data.replace(/\//g,'-') + '.html';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📄 File scaricato!');
+}
+
+function clearAllNotesP() {
+  if (!personalNotes.length) return;
+  if (confirm('Svuotare le note personali?')) {
+    personalNotes = []; savePersonal(); renderPersonal();
+  }
+}
+
+function savePersonal() { localStorage.setItem('av_personal', JSON.stringify(personalNotes)); }
+function loadPersonal() {
+  try { personalNotes = JSON.parse(localStorage.getItem('av_personal') || '[]'); }
+  catch(e) { personalNotes = []; }
+}
+
 function saveQuick() {
   localStorage.setItem('av_quick', JSON.stringify(quickNotes));
 }
@@ -443,10 +603,13 @@ document.getElementById('notesText').dataset.base = savedNotes;
 updateNotesCount();
 loadQuick();
 renderQuick();
+loadPersonal();
+renderPersonal();
 
 if (!hasSpeech) {
   document.getElementById('notesMicBtn').style.display = 'none';
   document.getElementById('quickMicBtn').style.display = 'none';
+  document.getElementById('personalMicBtn').style.display = 'none';
 }
 </script>
 </body>
