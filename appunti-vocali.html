@@ -195,7 +195,14 @@ function startMic(target) {
       updateNotesCount();
       ta.scrollTop = ta.scrollHeight;
     } else {
-      setPreview(final || interim, !!(final || interim));
+      // Per le note veloci mostra interim ma salva solo final
+      if (final) {
+        setPreview(final, true);
+      } else if (interim) {
+        // Mostra solo interim visivamente, non sovrascrive
+        document.getElementById('quickPreviewText').textContent = interim;
+        document.getElementById('quickPreview').classList.add('has-text');
+      }
     }
   };
 
@@ -291,9 +298,21 @@ function addNote() {
 }
 
 function toggleDone(idx) {
+  if (idx < 0 || idx >= quickNotes.length) return;
   quickNotes[idx].done = !quickNotes[idx].done;
   saveQuick();
-  renderQuick();
+  // Aggiorna solo la card senza ricreare tutto
+  const item = document.querySelector('.note-item[data-idx="'+idx+'"]');
+  if (item) {
+    const box = item.querySelector('.check-box');
+    if (quickNotes[idx].done) {
+      item.classList.add('done');
+      box.classList.add('checked');
+    } else {
+      item.classList.remove('done');
+      box.classList.remove('checked');
+    }
+  }
 }
 
 function renderQuick() {
@@ -307,13 +326,23 @@ function renderQuick() {
   quickNotes.forEach((note, i) => {
     const item = document.createElement('div');
     item.className = 'note-item' + (note.done ? ' done' : '');
-    item.innerHTML = `
-      <span class="note-num">${i + 1}.</span>
-      <span class="note-text" id="ntext-${i}" onclick="editNote(${i})">${esc(note.text)}</span>
-      <div class="check-wrap" onclick="toggleDone(${i})">
-        <div class="check-box${note.done ? ' checked' : ''}"></div>
-      </div>
-    `;
+    item.dataset.idx = i;
+    const num = document.createElement('span');
+    num.className = 'note-num';
+    num.textContent = (i+1) + '.';
+    const txt = document.createElement('span');
+    txt.className = 'note-text';
+    txt.textContent = note.text;
+    txt.addEventListener('click', () => editNote(i));
+    const wrap = document.createElement('div');
+    wrap.className = 'check-wrap';
+    const box = document.createElement('div');
+    box.className = 'check-box' + (note.done ? ' checked' : '');
+    wrap.appendChild(box);
+    wrap.addEventListener('click', () => toggleDone(i));
+    item.appendChild(num);
+    item.appendChild(txt);
+    item.appendChild(wrap);
     list.appendChild(item);
   });
   list.scrollTop = list.scrollHeight;
