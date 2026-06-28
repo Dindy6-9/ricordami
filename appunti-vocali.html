@@ -99,6 +99,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <span>🎙️</span><span id="notesMicLabel">Ditta</span>
         </button>
         <button class="action-btn" onclick="copyNotes()">📋 Copia</button>
+        <button class="action-btn" style="background:var(--accent)" onclick="emailNotes()">📧 Email</button>
         <button class="clear-btn" onclick="clearNotes()">🗑</button>
       </div>
     </div>
@@ -124,7 +125,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
         <button class="add-btn" id="addBtn" onclick="addNote()" disabled>Aggiungi</button>
       </div>
       <div class="quick-actions">
-        <button class="export-btn" onclick="exportNotes()">📤 Esporta lista</button>
+        <button class="export-btn" onclick="exportNotes()">📄 Scarica lista</button>
         <button class="clearall-btn" onclick="clearAllNotes()">🗑 Svuota</button>
       </div>
     </div>
@@ -242,6 +243,15 @@ function updateNotesCount() {
   document.getElementById('notesCount').textContent = w + ' parole · ' + val.length + ' car.';
 }
 
+function emailNotes() {
+  const text = document.getElementById('notesText').value.trim();
+  if (!text) { showToast('Nessun appunto da inviare.'); return; }
+  const data = new Date().toLocaleDateString('it-IT');
+  const subject = encodeURIComponent('Appunti del ' + data);
+  const body = encodeURIComponent(text);
+  window.location.href = 'mailto:favola2011m+appunti@gmail.com?subject=' + subject + '&body=' + body;
+}
+
 function copyNotes() {
   const text = document.getElementById('notesText').value.trim();
   if (!text) { showToast('Nessun appunto da copiare.'); return; }
@@ -299,7 +309,7 @@ function renderQuick() {
     item.className = 'note-item' + (note.done ? ' done' : '');
     item.innerHTML = `
       <span class="note-num">${i + 1}.</span>
-      <span class="note-text">${esc(note.text)}</span>
+      <span class="note-text" id="ntext-${i}" onclick="editNote(${i})">${esc(note.text)}</span>
       <div class="check-wrap" onclick="toggleDone(${i})">
         <div class="check-box${note.done ? ' checked' : ''}"></div>
       </div>
@@ -309,10 +319,63 @@ function renderQuick() {
   list.scrollTop = list.scrollHeight;
 }
 
+function editNote(idx) {
+  const newText = prompt('Modifica nota:', quickNotes[idx].text);
+  if (newText !== null && newText.trim()) {
+    quickNotes[idx].text = newText.trim();
+    saveQuick();
+    renderQuick();
+  }
+}
+
 function exportNotes() {
   if (!quickNotes.length) { showToast('Nessuna nota da esportare.'); return; }
-  const text = quickNotes.map((n, i) => `${i+1}. [${n.done ? '✓' : ' '}] ${n.text}`).join('\n');
-  navigator.clipboard.writeText(text).then(() => showToast('📤 Lista copiata negli appunti!'));
+  const data = new Date().toLocaleDateString('it-IT');
+  const ora = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+  const righe = quickNotes.map((n, i) => `
+    <tr>
+      <td style="padding:8px 12px;font-weight:700;color:#888;font-size:14px">${i+1}.</td>
+      <td style="padding:8px 12px;font-size:15px;color:#222">${n.text}</td>
+      <td style="padding:8px 12px;text-align:center;font-size:18px">${n.done ? '🟢' : '⬜'}</td>
+    </tr>`).join('');
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Note veloci — ${data}</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#222}
+  h1{font-size:22px;margin-bottom:4px;color:#111}
+  .sub{font-size:13px;color:#888;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse}
+  tr:nth-child(even){background:#f9f9f9}
+  tr{border-bottom:1px solid #eee}
+  .footer{margin-top:24px;font-size:12px;color:#aaa;text-align:center}
+</style>
+</head>
+<body>
+<h1>📋 Note veloci</h1>
+<div class="sub">Esportate il ${data} alle ${ora}</div>
+<table>
+  <tr style="background:#f0f0f0">
+    <th style="padding:8px 12px;text-align:left;font-size:13px">#</th>
+    <th style="padding:8px 12px;text-align:left;font-size:13px">Nota</th>
+    <th style="padding:8px 12px;font-size:13px">Fatto</th>
+  </tr>
+  ${righe}
+</table>
+<div class="footer">Generato da Appunti Vocali</div>
+</body>
+</html>`;
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'note-veloci-' + data.replace(/\//g,'-') + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 File scaricato!');
 }
 
 function clearAllNotes() {
