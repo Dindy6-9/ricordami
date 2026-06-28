@@ -115,9 +115,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div>Ditta una nota veloce<br>e premi Aggiungi</div>
         </div>
       </div>
-      <div class="quick-preview" id="quickPreview">
-        <span id="quickPreviewText">Cosa vuoi annotare?</span>
-        <button class="preview-clear" id="previewClearBtn" onclick="clearPreview()">✕</button>
+      <div class="quick-preview" id="quickPreview" style="padding:0;background:transparent;border:none">
+        <textarea id="quickPreviewText" placeholder="Ditta o scrivi la nota…"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:Inter,sans-serif;resize:none;outline:none;min-height:44px;line-height:1.5;transition:border-color .2s"
+          oninput="onQuickInput()" rows="2"></textarea>
       </div>
       <div class="quick-row">
         <button class="mic-btn" id="quickMicBtn" onclick="toggleMic('quick')">
@@ -140,9 +141,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div>Note personali<br>Ditta e premi Aggiungi</div>
         </div>
       </div>
-      <div class="quick-preview" id="personalPreview">
-        <span id="personalPreviewText">Cosa vuoi annotare?</span>
-        <button class="preview-clear" id="personalClearBtn" onclick="clearPreviewP()">✕</button>
+      <div class="quick-preview" id="personalPreview" style="padding:0;background:transparent;border:none">
+        <textarea id="personalPreviewText" placeholder="Ditta o scrivi la nota…"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:Inter,sans-serif;resize:none;outline:none;min-height:44px;line-height:1.5;transition:border-color .2s"
+          oninput="onPersonalInput()" rows="2"></textarea>
       </div>
       <div class="quick-row">
         <button class="mic-btn" id="personalMicBtn" onclick="toggleMic('personal')">
@@ -208,14 +210,12 @@ function startMic(target) {
       isRecordingQuick = true;
       document.getElementById('quickMicBtn').classList.add('recording');
       document.getElementById('quickMicLabel').textContent = 'Fermo';
-      document.getElementById('quickPreview').classList.add('listening');
-      setPreview('Sto ascoltando…', false);
+      document.getElementById('quickPreviewText').value = 'Sto ascoltando…';
     } else {
       isRecordingPersonal = true;
       document.getElementById('personalMicBtn').classList.add('recording');
       document.getElementById('personalMicLabel').textContent = 'Fermo';
-      document.getElementById('personalPreview').classList.add('listening');
-      setPreviewP('Sto ascoltando…', false);
+      document.getElementById('personalPreviewText').value = 'Sto ascoltando…';
     }
   };
 
@@ -235,19 +235,13 @@ function startMic(target) {
       updateNotesCount();
       ta.scrollTop = ta.scrollHeight;
     } else if (target === 'quick') {
-      if (final) {
-        setPreview(final, true);
-      } else if (interim) {
-        document.getElementById('quickPreviewText').textContent = interim;
-        document.getElementById('quickPreview').classList.add('has-text');
-      }
+      const ta = document.getElementById('quickPreviewText');
+      ta.value = final || interim;
+      document.getElementById('addBtn').disabled = !(final || interim).trim();
     } else {
-      if (final) {
-        setPreviewP(final, true);
-      } else if (interim) {
-        document.getElementById('personalPreviewText').textContent = interim;
-        document.getElementById('personalPreview').classList.add('has-text');
-      }
+      const ta = document.getElementById('personalPreviewText');
+      ta.value = final || interim;
+      document.getElementById('addBtnP').disabled = !(final || interim).trim();
     }
   };
 
@@ -263,16 +257,15 @@ function startMic(target) {
       isRecordingQuick = false;
       document.getElementById('quickMicBtn').classList.remove('recording');
       document.getElementById('quickMicLabel').textContent = 'Parla';
-      document.getElementById('quickPreview').classList.remove('listening');
-      const txt = document.getElementById('quickPreviewText').textContent;
-      if (!txt || txt === 'Sto ascoltando…') setPreview('', false);
+
+      const val = document.getElementById('quickPreviewText').value;
+      if (!val || val === 'Sto ascoltando…') clearPreview();
     } else {
       isRecordingPersonal = false;
       document.getElementById('personalMicBtn').classList.remove('recording');
       document.getElementById('personalMicLabel').textContent = 'Parla';
-      document.getElementById('personalPreview').classList.remove('listening');
-      const txt = document.getElementById('personalPreviewText').textContent;
-      if (!txt || txt === 'Sto ascoltando…') setPreviewP('', false);
+      const val = document.getElementById('personalPreviewText').value;
+      if (!val || val === 'Sto ascoltando…') clearPreviewP();
     }
   };
 
@@ -329,24 +322,28 @@ function clearNotes() {
 
 // ===== NOTE VELOCI =====
 function setPreview(text, hasContent) {
-  const span = document.getElementById('quickPreviewText');
-  const clearBtn = document.getElementById('previewClearBtn');
-  const addBtn = document.getElementById('addBtn');
-  span.textContent = text || 'Cosa vuoi annotare?';
-  document.getElementById('quickPreview').classList.toggle('has-text', hasContent && !!text);
-  clearBtn.style.display = (hasContent && text) ? 'block' : 'none';
-  addBtn.disabled = !(hasContent && text && text.trim().length > 0);
+  const ta = document.getElementById('quickPreviewText');
+  if (text) ta.value = text;
+  document.getElementById('addBtn').disabled = !(hasContent && text && text.trim().length > 0);
 }
 
-function clearPreview() { setPreview('', false); }
+function clearPreview() {
+  document.getElementById('quickPreviewText').value = '';
+  document.getElementById('addBtn').disabled = true;
+}
+
+function onQuickInput() {
+  const val = document.getElementById('quickPreviewText').value.trim();
+  document.getElementById('addBtn').disabled = !val;
+}
 
 function addNote() {
-  const text = document.getElementById('quickPreviewText').textContent.trim();
-  if (!text || text === 'Cosa vuoi annotare?') return;
+  const text = document.getElementById('quickPreviewText').value.trim();
+  if (!text) return;
   quickNotes.push({ text, done: false });
   saveQuick();
   renderQuick();
-  setPreview('', false);
+  clearPreview();
 }
 
 function toggleDone(idx) {
@@ -470,24 +467,28 @@ function clearAllNotes() {
 
 // ===== PERSONALE =====
 function setPreviewP(text, hasContent) {
-  const span = document.getElementById('personalPreviewText');
-  const clearBtn = document.getElementById('personalClearBtn');
-  const addBtn = document.getElementById('addBtnP');
-  span.textContent = text || 'Cosa vuoi annotare?';
-  document.getElementById('personalPreview').classList.toggle('has-text', hasContent && !!text);
-  clearBtn.style.display = (hasContent && text) ? 'block' : 'none';
-  addBtn.disabled = !(hasContent && text && text.trim().length > 0);
+  const ta = document.getElementById('personalPreviewText');
+  if (text) ta.value = text;
+  document.getElementById('addBtnP').disabled = !(hasContent && text && text.trim().length > 0);
 }
 
-function clearPreviewP() { setPreviewP('', false); }
+function clearPreviewP() {
+  document.getElementById('personalPreviewText').value = '';
+  document.getElementById('addBtnP').disabled = true;
+}
+
+function onPersonalInput() {
+  const val = document.getElementById('personalPreviewText').value.trim();
+  document.getElementById('addBtnP').disabled = !val;
+}
 
 function addNoteP() {
-  const text = document.getElementById('personalPreviewText').textContent.trim();
-  if (!text || text === 'Cosa vuoi annotare?') return;
+  const text = document.getElementById('personalPreviewText').value.trim();
+  if (!text) return;
   personalNotes.push({ text, done: false });
   savePersonal();
   renderPersonal();
-  setPreviewP('', false);
+  clearPreviewP();
 }
 
 function toggleDoneP(idx) {
