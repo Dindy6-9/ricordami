@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0f0f0f">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Appunti Vocali</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
@@ -25,50 +24,54 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .tab-content{display:none;flex:1;flex-direction:column;overflow:hidden}
 .tab-content.active{display:flex}
 
-/* APPUNTI LUNGHI */
+/* APPUNTI */
 .notes-area{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 14px}
 .notes-text{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;resize:none;outline:none;transition:border-color .2s;overflow-y:auto}
 .notes-text:focus{border-color:var(--note)}
 .notes-text::placeholder{color:var(--text-muted);font-style:italic}
 .notes-count{font-size:11px;color:var(--text-muted);text-align:right;margin-top:5px}
 .notes-bottom{margin-top:8px;display:flex;gap:8px}
-.notes-mic-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
-.notes-mic-btn:hover{border-color:var(--note);color:var(--note)}
-.notes-mic-btn.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:recGlow 1s ease-in-out infinite}
-.notes-copy-btn{background:var(--note);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 14px;cursor:pointer;white-space:nowrap}
-.notes-clear-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;padding:12px 14px;cursor:pointer;white-space:nowrap}
-.notes-clear-btn:hover{border-color:var(--danger);color:var(--danger)}
+.mic-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
+.mic-btn.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:recGlow 1s ease-in-out infinite}
+@keyframes recGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,79,79,0)}50%{box-shadow:0 0 10px 2px rgba(255,79,79,.2)}}
+.action-btn{background:var(--note);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 14px;cursor:pointer;white-space:nowrap}
+.clear-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;padding:12px 14px;cursor:pointer}
+.clear-btn:hover{border-color:var(--danger);color:var(--danger)}
 
 /* NOTE VELOCI */
 .quick-area{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 14px}
 .quick-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .quick-list::-webkit-scrollbar{width:3px}
 .quick-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.quick-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;gap:8px;opacity:.5}
+.quick-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;gap:8px;opacity:.5;text-align:center}
 .quick-empty-icon{font-size:32px}
-.note-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .2s ease}
+
+/* CARD NOTA */
+.note-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:slideIn .2s ease;transition:border-color .3s}
+.note-item.done{border-color:var(--done);background:rgba(61,220,132,.05)}
 @keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.note-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0;min-width:22px}
+.note-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--text-muted);flex-shrink:0;min-width:20px}
+.note-item.done .note-num{color:var(--done)}
 .note-text{flex:1;font-size:14px;line-height:1.4;color:var(--text);word-break:break-word}
-.note-del{background:none;border:none;color:var(--text-muted);font-size:15px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;transition:color .2s}
-.note-del:hover{color:var(--danger)}
-.quick-bottom{display:flex;flex-direction:column;gap:8px}
-.quick-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 32px 10px 12px;font-size:13px;color:var(--text-muted);min-height:42px;display:flex;align-items:center;font-style:italic;position:relative;transition:border-color .2s}
+/* CHECKBOX */
+.check-wrap{flex-shrink:0;cursor:pointer}
+.check-box{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .25s;background:var(--surface2)}
+.check-box.checked{background:var(--done);border-color:var(--done)}
+.check-box.checked::after{content:'✓';color:#0f0f0f;font-size:14px;font-weight:700;line-height:1}
+
+/* PREVIEW DETTATURA */
+.quick-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 34px 10px 12px;font-size:13px;color:var(--text-muted);min-height:42px;display:flex;align-items:center;font-style:italic;position:relative;transition:border-color .2s;margin-bottom:8px}
 .quick-preview.has-text{color:var(--text);font-style:normal;border-color:var(--accent)}
 .quick-preview.listening{border-color:var(--danger);animation:borderPulse 1s ease-in-out infinite}
 @keyframes borderPulse{0%,100%{border-color:var(--danger)}50%{border-color:rgba(255,79,79,.3)}}
-.quick-clear-preview{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none}
-.quick-row{display:flex;gap:8px}
-.quick-mic-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
-.quick-mic-btn:hover{border-color:var(--accent);color:var(--accent)}
-.quick-mic-btn.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:recGlow 1s ease-in-out infinite}
-@keyframes recGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,79,79,0)}50%{box-shadow:0 0 10px 2px rgba(255,79,79,.2)}}
-.quick-add-btn{background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 16px;cursor:pointer;white-space:nowrap}
-.quick-add-btn:disabled{opacity:.3;cursor:default}
+.preview-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none}
+.quick-row{display:flex;gap:8px;margin-bottom:8px}
 .quick-actions{display:flex;gap:8px}
-.quick-copy-btn{flex:1;background:var(--note);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:10px;cursor:pointer}
-.quick-clearall-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:12px;padding:10px 14px;cursor:pointer}
-.quick-clearall-btn:hover{border-color:var(--danger);color:var(--danger)}
+.export-btn{flex:1;background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:10px;cursor:pointer}
+.clearall-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:12px;padding:10px 14px;cursor:pointer}
+.clearall-btn:hover{border-color:var(--danger);color:var(--danger)}
+.add-btn{background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 16px;cursor:pointer;white-space:nowrap}
+.add-btn:disabled{opacity:.3;cursor:default}
 
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;color:var(--accent);z-index:999;max-width:340px;width:90%;text-align:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -84,19 +87,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="tab" onclick="switchTab('quick')">⚡ Note veloci</div>
   </div>
 
-  <!-- TAB APPUNTI LUNGHI -->
+  <!-- TAB APPUNTI -->
   <div class="tab-content active" id="tab-notes">
     <div class="notes-area">
       <textarea class="notes-text" id="notesText"
-        placeholder="Parla o scrivi… ogni dettatura viene aggiunta in coda."
+        placeholder="Ditta o scrivi… ogni dettatura va a capo automaticamente."
         oninput="saveNotes()"></textarea>
       <div class="notes-count" id="notesCount">0 parole</div>
       <div class="notes-bottom">
-        <button class="notes-mic-btn" id="notesMicBtn" onclick="toggleMic('notes')">
-          <span>🎙️</span><span id="notesMicLabel">Ditta appunto</span>
+        <button class="mic-btn" id="notesMicBtn" onclick="toggleMic('notes')">
+          <span>🎙️</span><span id="notesMicLabel">Ditta</span>
         </button>
-        <button class="notes-copy-btn" onclick="copyNotes()">Copia</button>
-        <button class="notes-clear-btn" onclick="clearNotes()">🗑</button>
+        <button class="action-btn" onclick="copyNotes()">📋 Copia</button>
+        <button class="clear-btn" onclick="clearNotes()">🗑</button>
       </div>
     </div>
   </div>
@@ -107,24 +110,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="quick-list" id="quickList">
         <div class="quick-empty" id="quickEmpty">
           <div class="quick-empty-icon">⚡</div>
-          <div>Ditta una nota veloce</div>
+          <div>Ditta una nota veloce<br>e premi Aggiungi</div>
         </div>
       </div>
-      <div class="quick-bottom">
-        <div class="quick-preview" id="quickPreview">
-          <span id="quickPreviewText">Cosa vuoi annotare?</span>
-          <button class="quick-clear-preview" id="quickClearBtn" onclick="clearQuickPreview()">✕</button>
-        </div>
-        <div class="quick-row">
-          <button class="quick-mic-btn" id="quickMicBtn" onclick="toggleMic('quick')">
-            <span>🎙️</span><span id="quickMicLabel">Parla</span>
-          </button>
-          <button class="quick-add-btn" id="quickAddBtn" onclick="addQuickNote()" disabled>Aggiungi</button>
-        </div>
-        <div class="quick-actions">
-          <button class="quick-copy-btn" onclick="copyQuick()">📋 Copia lista</button>
-          <button class="quick-clearall-btn" onclick="clearAllQuick()">🗑 Svuota lista</button>
-        </div>
+      <div class="quick-preview" id="quickPreview">
+        <span id="quickPreviewText">Cosa vuoi annotare?</span>
+        <button class="preview-clear" id="previewClearBtn" onclick="clearPreview()">✕</button>
+      </div>
+      <div class="quick-row">
+        <button class="mic-btn" id="quickMicBtn" onclick="toggleMic('quick')">
+          <span>🎙️</span><span id="quickMicLabel">Parla</span>
+        </button>
+        <button class="add-btn" id="addBtn" onclick="addNote()" disabled>Aggiungi</button>
+      </div>
+      <div class="quick-actions">
+        <button class="export-btn" onclick="exportNotes()">📤 Esporta lista</button>
+        <button class="clearall-btn" onclick="clearAllNotes()">🗑 Svuota</button>
       </div>
     </div>
   </div>
@@ -137,7 +138,7 @@ const hasSpeech = !!SpeechRecognition;
 let recognition = null;
 let isRecordingNotes = false;
 let isRecordingQuick = false;
-let quickNotes = [];
+let quickNotes = []; // [{text, done}]
 
 // ===== TABS =====
 function switchTab(tab) {
@@ -148,7 +149,7 @@ function switchTab(tab) {
 
 // ===== MICROFONO =====
 function toggleMic(target) {
-  if (!hasSpeech) { showToast('Usa Chrome su Android per il microfono'); return; }
+  if (!hasSpeech) { showToast('Usa Chrome su Android'); return; }
   if (target === 'notes') {
     if (isRecordingNotes) stopMic(); else startMic('notes');
   } else {
@@ -173,7 +174,7 @@ function startMic(target) {
       document.getElementById('quickMicBtn').classList.add('recording');
       document.getElementById('quickMicLabel').textContent = 'Fermo';
       document.getElementById('quickPreview').classList.add('listening');
-      setQuickPreview('Sto ascoltando…', false);
+      setPreview('Sto ascoltando…', false);
     }
   };
 
@@ -186,12 +187,14 @@ function startMic(target) {
     if (target === 'notes') {
       const ta = document.getElementById('notesText');
       const base = ta.dataset.base || '';
-      const sep = base ? ' ' : '';
+      // Va a capo dopo ogni dettatura
+      const sep = base ? '\n' : '';
       ta.value = base + sep + (final || interim);
       if (final) { ta.dataset.base = ta.value; saveNotes(); }
       updateNotesCount();
+      ta.scrollTop = ta.scrollHeight;
     } else {
-      setQuickPreview(final || interim, !!(final || interim));
+      setPreview(final || interim, !!(final || interim));
     }
   };
 
@@ -199,7 +202,7 @@ function startMic(target) {
     if (target === 'notes') {
       isRecordingNotes = false;
       document.getElementById('notesMicBtn').classList.remove('recording');
-      document.getElementById('notesMicLabel').textContent = 'Ditta appunto';
+      document.getElementById('notesMicLabel').textContent = 'Ditta';
       const ta = document.getElementById('notesText');
       ta.dataset.base = ta.value;
       saveNotes();
@@ -209,22 +212,19 @@ function startMic(target) {
       document.getElementById('quickMicLabel').textContent = 'Parla';
       document.getElementById('quickPreview').classList.remove('listening');
       const txt = document.getElementById('quickPreviewText').textContent;
-      if (!txt || txt === 'Sto ascoltando…') setQuickPreview('', false);
+      if (!txt || txt === 'Sto ascoltando…') setPreview('', false);
     }
   };
 
   recognition.onerror = (e) => {
     try { recognition.onend(null); } catch(ex) {}
     if (e.error === 'not-allowed') showToast('Permesso microfono negato');
-    else if (e.error !== 'no-speech') showToast('Errore microfono: ' + e.error);
+    else if (e.error !== 'no-speech') showToast('Errore: ' + e.error);
   };
 
-  // Base per appunti
   if (target === 'notes') {
-    const ta = document.getElementById('notesText');
-    ta.dataset.base = ta.value;
+    document.getElementById('notesText').dataset.base = document.getElementById('notesText').value;
   }
-
   recognition.start();
 }
 
@@ -232,8 +232,7 @@ function stopMic() { if (recognition) { try { recognition.stop(); } catch(e){} }
 
 // ===== APPUNTI =====
 function saveNotes() {
-  const val = document.getElementById('notesText').value;
-  localStorage.setItem('av_notes', val);
+  localStorage.setItem('av_notes', document.getElementById('notesText').value);
   updateNotesCount();
 }
 
@@ -260,30 +259,29 @@ function clearNotes() {
 }
 
 // ===== NOTE VELOCI =====
-function setQuickPreview(text, hasContent) {
+function setPreview(text, hasContent) {
   const span = document.getElementById('quickPreviewText');
-  const clearBtn = document.getElementById('quickClearBtn');
-  const addBtn = document.getElementById('quickAddBtn');
+  const clearBtn = document.getElementById('previewClearBtn');
+  const addBtn = document.getElementById('addBtn');
   span.textContent = text || 'Cosa vuoi annotare?';
   document.getElementById('quickPreview').classList.toggle('has-text', hasContent && !!text);
   clearBtn.style.display = (hasContent && text) ? 'block' : 'none';
   addBtn.disabled = !(hasContent && text && text.trim().length > 0);
 }
 
-function clearQuickPreview() { setQuickPreview('', false); }
+function clearPreview() { setPreview('', false); }
 
-function addQuickNote() {
+function addNote() {
   const text = document.getElementById('quickPreviewText').textContent.trim();
   if (!text || text === 'Cosa vuoi annotare?') return;
-  quickNotes.push(text);
+  quickNotes.push({ text, done: false });
   saveQuick();
   renderQuick();
-  setQuickPreview('', false);
-  showToast('✅ Nota aggiunta!');
+  setPreview('', false);
 }
 
-function deleteQuickNote(idx) {
-  quickNotes.splice(idx, 1);
+function toggleDone(idx) {
+  quickNotes[idx].done = !quickNotes[idx].done;
   saveQuick();
   renderQuick();
 }
@@ -296,27 +294,28 @@ function renderQuick() {
     list.appendChild(empty);
     return;
   }
-  quickNotes.forEach((text, i) => {
+  quickNotes.forEach((note, i) => {
     const item = document.createElement('div');
-    item.className = 'note-item';
+    item.className = 'note-item' + (note.done ? ' done' : '');
     item.innerHTML = `
       <span class="note-num">${i + 1}.</span>
-      <span class="note-text">${esc(text)}</span>
-      <button class="note-del" onclick="deleteQuickNote(${i})">✕</button>
+      <span class="note-text">${esc(note.text)}</span>
+      <div class="check-wrap" onclick="toggleDone(${i})">
+        <div class="check-box${note.done ? ' checked' : ''}"></div>
+      </div>
     `;
     list.appendChild(item);
   });
-  // Scorri in fondo
   list.scrollTop = list.scrollHeight;
 }
 
-function copyQuick() {
-  if (!quickNotes.length) { showToast('Nessuna nota da copiare.'); return; }
-  const text = quickNotes.map((n, i) => `${i+1}. ${n}`).join('\n');
-  navigator.clipboard.writeText(text).then(() => showToast('📋 Lista copiata!'));
+function exportNotes() {
+  if (!quickNotes.length) { showToast('Nessuna nota da esportare.'); return; }
+  const text = quickNotes.map((n, i) => `${i+1}. [${n.done ? '✓' : ' '}] ${n.text}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('📤 Lista copiata negli appunti!'));
 }
 
-function clearAllQuick() {
+function clearAllNotes() {
   if (!quickNotes.length) return;
   if (confirm('Svuotare tutta la lista?')) {
     quickNotes = [];
@@ -330,7 +329,8 @@ function saveQuick() {
 }
 
 function loadQuick() {
-  try { quickNotes = JSON.parse(localStorage.getItem('av_quick') || '[]'); } catch(e) { quickNotes = []; }
+  try { quickNotes = JSON.parse(localStorage.getItem('av_quick') || '[]'); }
+  catch(e) { quickNotes = []; }
 }
 
 // ===== UTILS =====
