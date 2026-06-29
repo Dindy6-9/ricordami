@@ -12,606 +12,509 @@
 :root{
   --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
   --accent:#e8ff47;--accent-dim:rgba(232,255,71,0.12);
-  --text:#f0f0f0;--text-muted:#666;--danger:#ff4f4f;--done:#3ddc84;--note:#7eb8f7;
+  --text:#f0f0f0;--text-muted:#555;--danger:#ff4f4f;--done:#3ddc84;--note:#7eb8f7;--personal:#c084fc;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto}
-.header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0}
-.logo{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--accent)}
-.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
-.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+
+/* HEADER */
+.header{padding:14px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--accent)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:0;padding:9px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* TAB CONTENT */
 .tab-content{display:none;flex:1;flex-direction:column;overflow:hidden}
 .tab-content.active{display:flex}
 
-/* APPUNTI */
-.notes-area{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 14px}
-.notes-text{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;resize:none;outline:none;transition:border-color .2s;overflow-y:auto}
-.notes-text:focus{border-color:var(--note)}
-.notes-text::placeholder{color:var(--text-muted);font-style:italic}
-.notes-count{font-size:11px;color:var(--text-muted);text-align:right;margin-top:5px}
-.notes-bottom{margin-top:8px;display:flex;gap:8px}
-.mic-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
-.mic-btn.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:recGlow 1s ease-in-out infinite}
-@keyframes recGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,79,79,0)}50%{box-shadow:0 0 10px 2px rgba(255,79,79,.2)}}
-.action-btn{background:var(--note);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 14px;cursor:pointer;white-space:nowrap}
-.clear-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:13px;padding:12px 14px;cursor:pointer}
-.clear-btn:hover{border-color:var(--danger);color:var(--danger)}
+/* ===== APPUNTI (lavoro + personale) ===== */
+.notes-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 12px}
+.notes-ta{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.75;resize:none;outline:none;overflow-y:auto;transition:border-color .2s}
+.notes-ta:focus{border-color:var(--note)}
+.notes-ta.personal:focus{border-color:var(--personal)}
+.notes-ta::placeholder{color:var(--text-muted);font-style:italic}
+.notes-info{font-size:11px;color:var(--text-muted);text-align:right;margin-top:4px}
+.notes-btns{margin-top:8px;display:flex;gap:6px}
+.btn-mic{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.btn-mic.recording{background:rgba(255,79,79,.1);border-color:var(--danger);color:var(--danger);animation:glow 1s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,79,79,0)}50%{box-shadow:0 0 10px 2px rgba(255,79,79,.2)}}
+.btn-sm{background:none;border:1px solid var(--border);border-radius:9px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:11px;padding:11px 10px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.btn-sm:hover{border-color:var(--note);color:var(--note)}
+.btn-sm.email{background:var(--note);border-color:var(--note);color:#0f0f0f;font-weight:600}
+.btn-sm.email.personal{background:var(--personal);border-color:var(--personal)}
+.btn-sm.danger:hover{border-color:var(--danger);color:var(--danger)}
 
-/* NOTE VELOCI */
-.quick-area{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 14px}
-.quick-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.quick-list::-webkit-scrollbar{width:3px}
-.quick-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.quick-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;gap:8px;opacity:.5;text-align:center}
-.quick-empty-icon{font-size:32px}
+/* ===== NOTE (lavoro + personale) ===== */
+.quick-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 12px}
+.note-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.note-list::-webkit-scrollbar{width:3px}
+.note-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;gap:6px;opacity:.4;text-align:center}
+.empty-icon{font-size:28px}
 
 /* CARD NOTA */
-.note-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:slideIn .2s ease;transition:border-color .3s}
-.note-item.done{border-color:var(--done);background:rgba(61,220,132,.05)}
-@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.note-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--text-muted);flex-shrink:0;min-width:20px}
-.note-item.done .note-num{color:var(--done)}
-.note-text{flex:1;font-size:14px;line-height:1.4;color:var(--text);word-break:break-word}
-/* CHECKBOX */
-.check-wrap{flex-shrink:0;cursor:pointer}
-.check-box{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .25s;background:var(--surface2)}
-.check-box.checked{background:var(--done);border-color:var(--done)}
-.check-box.checked::after{content:'✓';color:#0f0f0f;font-size:14px;font-weight:700;line-height:1}
+.note-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:slideIn .2s ease}
+.note-card.done{border-color:rgba(61,220,132,.3);background:rgba(61,220,132,.04)}
+.note-card.archived{opacity:.6}
+@keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.note-n{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--text-muted);flex-shrink:0;min-width:18px}
+.note-card.done .note-n{color:var(--done)}
+.note-t{flex:1;font-size:13px;line-height:1.4;color:var(--text);word-break:break-word;cursor:pointer}
+.note-t:hover{color:var(--accent)}
+.check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;background:var(--surface2)}
+.check.on{background:var(--done);border-color:var(--done)}
+.check.on::after{content:'✓';color:#0f0f0f;font-size:12px;font-weight:800}
+.note-del{background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:2px 3px;flex-shrink:0;transition:color .2s;line-height:1}
+.note-del:hover{color:var(--danger)}
 
-/* PREVIEW DETTATURA */
-.quick-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 34px 10px 12px;font-size:13px;color:var(--text-muted);min-height:42px;display:flex;align-items:center;font-style:italic;position:relative;transition:border-color .2s;margin-bottom:8px}
-.quick-preview.has-text{color:var(--text);font-style:normal;border-color:var(--accent)}
-.quick-preview.listening{border-color:var(--danger);animation:borderPulse 1s ease-in-out infinite}
-@keyframes borderPulse{0%,100%{border-color:var(--danger)}50%{border-color:rgba(255,79,79,.3)}}
-.preview-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none}
-.quick-row{display:flex;gap:8px;margin-bottom:8px}
-.quick-actions{display:flex;gap:8px}
-.export-btn{flex:1;background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:10px;cursor:pointer}
-.clearall-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:12px;padding:10px 14px;cursor:pointer}
-.clearall-btn:hover{border-color:var(--danger);color:var(--danger)}
-.add-btn{background:var(--accent);border:none;border-radius:10px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px 16px;cursor:pointer;white-space:nowrap}
-.add-btn:disabled{opacity:.3;cursor:default}
+/* INPUT NOTA */
+.note-input-wrap{margin-bottom:6px}
+.note-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;resize:none;outline:none;line-height:1.5;transition:border-color .2s}
+.note-ta:focus{border-color:var(--accent)}
+.note-ta.personal:focus{border-color:var(--personal)}
+.note-ta::placeholder{color:var(--text-muted);font-style:italic}
+.note-btns{display:flex;gap:6px;margin-bottom:6px}
+.btn-add{background:var(--accent);border:none;border-radius:9px;color:#0f0f0f;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:10px 14px;cursor:pointer;white-space:nowrap}
+.btn-add:disabled{opacity:.3;cursor:default}
+.btn-add.personal{background:var(--personal)}
+.note-actions{display:flex;gap:6px}
+.btn-export{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:11px;padding:9px;cursor:pointer;text-align:center;transition:all .2s}
+.btn-export:hover{border-color:var(--accent);color:var(--accent)}
+.btn-archive{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:11px;padding:9px;cursor:pointer;text-align:center;transition:all .2s}
+.btn-archive:hover{border-color:var(--done);color:var(--done)}
+.btn-clearall{background:none;border:1px solid var(--border);border-radius:9px;color:var(--text-muted);font-family:'Inter',sans-serif;font-size:11px;padding:9px 12px;cursor:pointer;white-space:nowrap}
+.btn-clearall:hover{border-color:var(--danger);color:var(--danger)}
 
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;color:var(--accent);z-index:999;max-width:340px;width:90%;text-align:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+/* ARCHIVIO */
+.arch-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 12px}
+.arch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.arch-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px}
+.arch-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.arch-list::-webkit-scrollbar{width:3px}
+.arch-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.arch-card{background:var(--surface);border:1px solid rgba(61,220,132,.2);border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:8px}
+.arch-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.arch-badge.work{background:rgba(126,184,247,.15);color:var(--note)}
+.arch-badge.personal{background:rgba(192,132,252,.15);color:var(--personal)}
+.arch-text{flex:1;font-size:13px;color:var(--text-muted)}
+.arch-del{background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:2px;flex-shrink:0}
+.arch-del:hover{color:var(--danger)}
+
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--accent);z-index:999;max-width:320px;width:90%;text-align:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <div class="logo">🎙️ Appunti Vocali</div>
-  </div>
+  <div class="header"><div class="logo">🎙️ Appunti Vocali</div></div>
+
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('notes')">📝 Appunti</div>
-    <div class="tab" onclick="switchTab('quick')">⚡ Lavoro</div>
-    <div class="tab" onclick="switchTab('personal')">👤 Personale</div>
+    <div class="tab active" onclick="switchTab('notes-work')">📝 Lavoro</div>
+    <div class="tab" onclick="switchTab('notes-personal')">📓 Personale</div>
+    <div class="tab" onclick="switchTab('quick-work')">⚡ Note lavoro</div>
+    <div class="tab" onclick="switchTab('quick-personal')">👤 Note pers.</div>
+    <div class="tab" onclick="switchTab('archive')">🗂 Archivio</div>
   </div>
 
-  <!-- TAB APPUNTI -->
-  <div class="tab-content active" id="tab-notes">
-    <div class="notes-area">
-      <textarea class="notes-text" id="notesText"
-        placeholder="Ditta o scrivi… ogni dettatura va a capo automaticamente."
-        oninput="saveNotes()"></textarea>
-      <div class="notes-count" id="notesCount">0 parole</div>
-      <div class="notes-bottom">
-        <button class="mic-btn" id="notesMicBtn" onclick="toggleMic('notes')">
-          <span>🎙️</span><span id="notesMicLabel">Ditta</span>
-        </button>
-        <button class="action-btn" onclick="copyNotes()">📋 Copia</button>
-        <button class="action-btn" style="background:var(--accent)" onclick="emailNotes()">📧 Email</button>
-        <button class="clear-btn" onclick="clearNotes()">🗑</button>
+  <!-- APPUNTI LAVORO -->
+  <div class="tab-content active" id="tab-notes-work">
+    <div class="notes-wrap">
+      <textarea class="notes-ta" id="ta-work" placeholder="Ditta o scrivi appunti di lavoro…" oninput="saveTA('work')"></textarea>
+      <div class="notes-info" id="info-work">0 parole</div>
+      <div class="notes-btns">
+        <button class="btn-mic" id="mic-notes-work" onclick="toggleMic('notes-work')">🎙️ <span id="miclbl-notes-work">Ditta</span></button>
+        <button class="btn-sm email" onclick="emailTA('work')">📧 Email</button>
+        <button class="btn-sm danger" onclick="clearTA('work')">🗑</button>
       </div>
     </div>
   </div>
 
-  <!-- TAB NOTE VELOCI -->
-  <div class="tab-content" id="tab-quick">
-    <div class="quick-area">
-      <div class="quick-list" id="quickList">
-        <div class="quick-empty" id="quickEmpty">
-          <div class="quick-empty-icon">⚡</div>
-          <div>Ditta una nota veloce<br>e premi Aggiungi</div>
-        </div>
-      </div>
-      <div class="quick-preview" id="quickPreview" style="padding:0;background:transparent;border:none">
-        <textarea id="quickPreviewText" placeholder="Ditta o scrivi la nota…"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:Inter,sans-serif;resize:none;outline:none;min-height:44px;line-height:1.5;transition:border-color .2s"
-          oninput="onQuickInput()" rows="2"></textarea>
-      </div>
-      <div class="quick-row">
-        <button class="mic-btn" id="quickMicBtn" onclick="toggleMic('quick')">
-          <span>🎙️</span><span id="quickMicLabel">Parla</span>
-        </button>
-        <button class="add-btn" id="addBtn" onclick="addNote()" disabled>Aggiungi</button>
-      </div>
-      <div class="quick-actions">
-        <button class="export-btn" onclick="exportNotes()">📄 Scarica lista</button>
-        <button class="clearall-btn" onclick="clearAllNotes()">🗑 Svuota</button>
+  <!-- APPUNTI PERSONALI -->
+  <div class="tab-content" id="tab-notes-personal">
+    <div class="notes-wrap">
+      <textarea class="notes-ta personal" id="ta-personal" placeholder="Ditta o scrivi appunti personali…" oninput="saveTA('personal')"></textarea>
+      <div class="notes-info" id="info-personal">0 parole</div>
+      <div class="notes-btns">
+        <button class="btn-mic" id="mic-notes-personal" onclick="toggleMic('notes-personal')">🎙️ <span id="miclbl-notes-personal">Ditta</span></button>
+        <button class="btn-sm email personal" onclick="emailTA('personal')">📧 Email</button>
+        <button class="btn-sm danger" onclick="clearTA('personal')">🗑</button>
       </div>
     </div>
   </div>
-  <!-- TAB PERSONALE -->
-  <div class="tab-content" id="tab-personal">
-    <div class="quick-area">
-      <div class="quick-list" id="personalList">
-        <div class="quick-empty" id="personalEmpty">
-          <div class="quick-empty-icon">👤</div>
-          <div>Note personali<br>Ditta e premi Aggiungi</div>
-        </div>
+
+  <!-- NOTE VELOCI LAVORO -->
+  <div class="tab-content" id="tab-quick-work">
+    <div class="quick-wrap">
+      <div class="note-list" id="list-work"><div class="empty-state"><div class="empty-icon">⚡</div><div>Nessuna nota di lavoro</div></div></div>
+      <div class="note-input-wrap">
+        <textarea class="note-ta" id="input-work" placeholder="Ditta o scrivi…" rows="2" oninput="checkAddBtn('work')"></textarea>
       </div>
-      <div class="quick-preview" id="personalPreview" style="padding:0;background:transparent;border:none">
-        <textarea id="personalPreviewText" placeholder="Ditta o scrivi la nota…"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);font-family:Inter,sans-serif;resize:none;outline:none;min-height:44px;line-height:1.5;transition:border-color .2s"
-          oninput="onPersonalInput()" rows="2"></textarea>
+      <div class="note-btns">
+        <button class="btn-mic" id="mic-quick-work" onclick="toggleMic('quick-work')">🎙️ <span id="miclbl-quick-work">Parla</span></button>
+        <button class="btn-add" id="add-work" onclick="addNote('work')" disabled>Aggiungi</button>
       </div>
-      <div class="quick-row">
-        <button class="mic-btn" id="personalMicBtn" onclick="toggleMic('personal')">
-          <span>🎙️</span><span id="personalMicLabel">Parla</span>
-        </button>
-        <button class="add-btn" id="addBtnP" onclick="addNoteP()" disabled>Aggiungi</button>
+      <div class="note-actions">
+        <button class="btn-archive" onclick="archiveDone('work')">🗂 Archivia fatte</button>
+        <button class="btn-export" onclick="exportNotes('work')">📄 Scarica</button>
+        <button class="btn-clearall" onclick="clearAll('work')">🗑</button>
       </div>
-      <div class="quick-actions">
-        <button class="export-btn" onclick="exportNotesP()">📄 Scarica lista</button>
-        <button class="clearall-btn" onclick="clearAllNotesP()">🗑 Svuota</button>
+    </div>
+  </div>
+
+  <!-- NOTE VELOCI PERSONALI -->
+  <div class="tab-content" id="tab-quick-personal">
+    <div class="quick-wrap">
+      <div class="note-list" id="list-personal"><div class="empty-state"><div class="empty-icon">👤</div><div>Nessuna nota personale</div></div></div>
+      <div class="note-input-wrap">
+        <textarea class="note-ta personal" id="input-personal" placeholder="Ditta o scrivi…" rows="2" oninput="checkAddBtn('personal')"></textarea>
       </div>
+      <div class="note-btns">
+        <button class="btn-mic" id="mic-quick-personal" onclick="toggleMic('quick-personal')">🎙️ <span id="miclbl-quick-personal">Parla</span></button>
+        <button class="btn-add personal" id="add-personal" onclick="addNote('personal')" disabled>Aggiungi</button>
+      </div>
+      <div class="note-actions">
+        <button class="btn-archive" onclick="archiveDone('personal')">🗂 Archivia fatte</button>
+        <button class="btn-export" onclick="exportNotes('personal')">📄 Scarica</button>
+        <button class="btn-clearall" onclick="clearAll('personal')">🗑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHIVIO -->
+  <div class="tab-content" id="tab-archive">
+    <div class="arch-wrap">
+      <div class="arch-header">
+        <span class="arch-title">🗂 Note archiviate</span>
+        <button class="btn-clearall" onclick="clearArchive()">🗑 Svuota archivio</button>
+      </div>
+      <div class="arch-list" id="archiveList"><div class="empty-state"><div class="empty-icon">🗂</div><div>Nessuna nota archiviata</div></div></div>
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const hasSpeech = !!SpeechRecognition;
-let recognition = null;
-let isRecordingNotes = false;
-let isRecordingQuick = false;
-let isRecordingPersonal = false;
-let quickNotes = []; // [{text, done}]
-let personalNotes = []; // [{text, done}]
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+let recTarget = null;
+
+// STATO
+let notes = { work: [], personal: [] };
+let archive = [];
+
+// ===== INIT =====
+function init() {
+  // Appunti
+  ['work','personal'].forEach(k => {
+    const ta = document.getElementById('ta-'+k);
+    ta.value = localStorage.getItem('av_ta_'+k) || '';
+    updateInfo(k);
+  });
+  // Note
+  try { notes.work = JSON.parse(localStorage.getItem('av_notes_work') || '[]'); } catch(e){ notes.work=[]; }
+  try { notes.personal = JSON.parse(localStorage.getItem('av_notes_personal') || '[]'); } catch(e){ notes.personal=[]; }
+  try { archive = JSON.parse(localStorage.getItem('av_archive') || '[]'); } catch(e){ archive=[]; }
+  renderNotes('work');
+  renderNotes('personal');
+  renderArchive();
+}
 
 // ===== TABS =====
+const TABS = ['notes-work','notes-personal','quick-work','quick-personal','archive'];
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active',
-      (i===0&&tab==='notes')||(i===1&&tab==='quick')||(i===2&&tab==='personal'));
-  });
-  document.getElementById('tab-notes').classList.toggle('active', tab==='notes');
-  document.getElementById('tab-quick').classList.toggle('active', tab==='quick');
-  document.getElementById('tab-personal').classList.toggle('active', tab==='personal');
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', TABS[i]===tab));
+  TABS.forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===tab));
 }
 
 // ===== MICROFONO =====
 function toggleMic(target) {
-  if (!hasSpeech) { showToast('Usa Chrome su Android'); return; }
-  if (target === 'notes') {
-    if (isRecordingNotes) stopMic(); else startMic('notes');
-  } else if (target === 'quick') {
-    if (isRecordingQuick) stopMic(); else startMic('quick');
-  } else {
-    if (isRecordingPersonal) stopMic(); else startMic('personal');
-  }
+  if (!SR) { toast('Usa Chrome su Android'); return; }
+  if (recTarget === target && rec) { rec.stop(); return; }
+  if (rec) { try { rec.stop(); } catch(e){} }
+  startMic(target);
 }
 
 function startMic(target) {
-  if (recognition) { try { recognition.stop(); } catch(e){} }
-  recognition = new SpeechRecognition();
-  recognition.lang = 'it-IT';
-  recognition.continuous = false;
-  recognition.interimResults = true;
+  rec = new SR();
+  rec.lang = 'it-IT';
+  rec.continuous = false;
+  rec.interimResults = true;
+  recTarget = target;
 
-  recognition.onstart = () => {
-    if (target === 'notes') {
-      isRecordingNotes = true;
-      document.getElementById('notesMicBtn').classList.add('recording');
-      document.getElementById('notesMicLabel').textContent = 'Fermo';
-    } else if (target === 'quick') {
-      isRecordingQuick = true;
-      document.getElementById('quickMicBtn').classList.add('recording');
-      document.getElementById('quickMicLabel').textContent = 'Fermo';
-      document.getElementById('quickPreviewText').value = 'Sto ascoltando…';
-    } else {
-      isRecordingPersonal = true;
-      document.getElementById('personalMicBtn').classList.add('recording');
-      document.getElementById('personalMicLabel').textContent = 'Fermo';
-      document.getElementById('personalPreviewText').value = 'Sto ascoltando…';
+  const isNotes = target.startsWith('notes-');
+  const key = target.replace('notes-','').replace('quick-','');
+
+  rec.onstart = () => {
+    const btn = document.getElementById('mic-'+target);
+    const lbl = document.getElementById('miclbl-'+target);
+    btn.classList.add('recording');
+    lbl.textContent = 'Fermo';
+    if (!isNotes) {
+      document.getElementById('input-'+key).value = 'Sto ascoltando…';
     }
   };
 
-  recognition.onresult = (e) => {
-    let interim = '', final = '';
-    for (let r of e.results) {
-      if (r.isFinal) final += r[0].transcript;
-      else interim += r[0].transcript;
-    }
-    if (target === 'notes') {
-      const ta = document.getElementById('notesText');
+  rec.onresult = e => {
+    let fin='', tmp='';
+    for (let r of e.results) { if(r.isFinal) fin+=r[0].transcript; else tmp+=r[0].transcript; }
+    if (isNotes) {
+      const ta = document.getElementById('ta-'+key);
       const base = ta.dataset.base || '';
-      // Va a capo dopo ogni dettatura
       const sep = base ? '\n' : '';
-      ta.value = base + sep + (final || interim);
-      if (final) { ta.dataset.base = ta.value; saveNotes(); }
-      updateNotesCount();
+      ta.value = base + sep + (fin || tmp);
+      if (fin) { ta.dataset.base = ta.value; saveTA(key); }
+      updateInfo(key);
       ta.scrollTop = ta.scrollHeight;
-    } else if (target === 'quick') {
-      const ta = document.getElementById('quickPreviewText');
-      ta.value = final || interim;
-      document.getElementById('addBtn').disabled = !(final || interim).trim();
     } else {
-      const ta = document.getElementById('personalPreviewText');
-      ta.value = final || interim;
-      document.getElementById('addBtnP').disabled = !(final || interim).trim();
+      const inp = document.getElementById('input-'+key);
+      inp.value = fin || tmp;
+      checkAddBtn(key);
     }
   };
 
-  recognition.onend = () => {
-    if (target === 'notes') {
-      isRecordingNotes = false;
-      document.getElementById('notesMicBtn').classList.remove('recording');
-      document.getElementById('notesMicLabel').textContent = 'Ditta';
-      const ta = document.getElementById('notesText');
+  rec.onend = () => {
+    const btn = document.getElementById('mic-'+target);
+    const lbl = document.getElementById('miclbl-'+target);
+    btn.classList.remove('recording');
+    lbl.textContent = isNotes ? 'Ditta' : 'Parla';
+    recTarget = null;
+    if (isNotes) {
+      const ta = document.getElementById('ta-'+key);
       ta.dataset.base = ta.value;
-      saveNotes();
-    } else if (target === 'quick') {
-      isRecordingQuick = false;
-      document.getElementById('quickMicBtn').classList.remove('recording');
-      document.getElementById('quickMicLabel').textContent = 'Parla';
-
-      const val = document.getElementById('quickPreviewText').value;
-      if (!val || val === 'Sto ascoltando…') clearPreview();
+      saveTA(key);
     } else {
-      isRecordingPersonal = false;
-      document.getElementById('personalMicBtn').classList.remove('recording');
-      document.getElementById('personalMicLabel').textContent = 'Parla';
-      const val = document.getElementById('personalPreviewText').value;
-      if (!val || val === 'Sto ascoltando…') clearPreviewP();
+      const inp = document.getElementById('input-'+key);
+      if (inp.value === 'Sto ascoltando…') inp.value = '';
+      checkAddBtn(key);
     }
   };
 
-  recognition.onerror = (e) => {
-    try { recognition.onend(null); } catch(ex) {}
-    if (e.error === 'not-allowed') showToast('Permesso microfono negato');
-    else if (e.error !== 'no-speech') showToast('Errore: ' + e.error);
+  rec.onerror = e => {
+    try { rec.onend(); } catch(x){}
+    if (e.error === 'not-allowed') toast('Permesso microfono negato');
+    else if (e.error !== 'no-speech') toast('Errore: '+e.error);
   };
 
-  if (target === 'notes') {
-    document.getElementById('notesText').dataset.base = document.getElementById('notesText').value;
+  if (isNotes) {
+    const ta = document.getElementById('ta-'+key);
+    ta.dataset.base = ta.value;
   }
-  recognition.start();
+  rec.start();
 }
-
-function stopMic() { if (recognition) { try { recognition.stop(); } catch(e){} } }
 
 // ===== APPUNTI =====
-function saveNotes() {
-  localStorage.setItem('av_notes', document.getElementById('notesText').value);
-  updateNotesCount();
+function saveTA(key) {
+  localStorage.setItem('av_ta_'+key, document.getElementById('ta-'+key).value);
+  updateInfo(key);
 }
 
-function updateNotesCount() {
-  const val = document.getElementById('notesText').value.trim();
+function updateInfo(key) {
+  const val = document.getElementById('ta-'+key).value.trim();
   const w = val ? val.split(/\s+/).length : 0;
-  document.getElementById('notesCount').textContent = w + ' parole · ' + val.length + ' car.';
+  document.getElementById('info-'+key).textContent = w+' parole · '+val.length+' car.';
 }
 
-function emailNotes() {
-  const text = document.getElementById('notesText').value.trim();
-  if (!text) { showToast('Nessun appunto da inviare.'); return; }
+function emailTA(key) {
+  const text = document.getElementById('ta-'+key).value.trim();
+  if (!text) { toast('Nessun appunto da inviare.'); return; }
   const data = new Date().toLocaleDateString('it-IT');
-  const subject = encodeURIComponent('Appunti del ' + data);
+  const tipo = key==='work' ? 'Lavoro' : 'Personale';
+  const sub = encodeURIComponent('Appunti '+tipo+' del '+data);
   const body = encodeURIComponent(text);
-  window.location.href = 'mailto:favola2011m+appunti@gmail.com?subject=' + subject + '&body=' + body;
+  window.location.href = 'mailto:favola2011m+appunti@gmail.com?subject='+sub+'&body='+body;
 }
 
-function copyNotes() {
-  const text = document.getElementById('notesText').value.trim();
-  if (!text) { showToast('Nessun appunto da copiare.'); return; }
-  navigator.clipboard.writeText(text).then(() => showToast('📋 Copiato!'));
-}
-
-function clearNotes() {
-  if (!document.getElementById('notesText').value) return;
+function clearTA(key) {
+  if (!document.getElementById('ta-'+key).value) return;
   if (confirm('Svuotare gli appunti?')) {
-    document.getElementById('notesText').value = '';
-    document.getElementById('notesText').dataset.base = '';
-    localStorage.removeItem('av_notes');
-    updateNotesCount();
+    document.getElementById('ta-'+key).value = '';
+    document.getElementById('ta-'+key).dataset.base = '';
+    localStorage.removeItem('av_ta_'+key);
+    updateInfo(key);
   }
 }
 
 // ===== NOTE VELOCI =====
-function setPreview(text, hasContent) {
-  const ta = document.getElementById('quickPreviewText');
-  if (text) ta.value = text;
-  document.getElementById('addBtn').disabled = !(hasContent && text && text.trim().length > 0);
+function checkAddBtn(key) {
+  const val = document.getElementById('input-'+key).value.trim();
+  document.getElementById('add-'+key).disabled = !val;
 }
 
-function clearPreview() {
-  document.getElementById('quickPreviewText').value = '';
-  document.getElementById('addBtn').disabled = true;
-}
-
-function onQuickInput() {
-  const val = document.getElementById('quickPreviewText').value.trim();
-  document.getElementById('addBtn').disabled = !val;
-}
-
-function addNote() {
-  const text = document.getElementById('quickPreviewText').value.trim();
+function addNote(key) {
+  const inp = document.getElementById('input-'+key);
+  const text = inp.value.trim();
   if (!text) return;
-  quickNotes.push({ text, done: false });
-  saveQuick();
-  renderQuick();
-  clearPreview();
+  notes[key].push({ text, done: false });
+  saveNotes(key);
+  renderNotes(key);
+  inp.value = '';
+  document.getElementById('add-'+key).disabled = true;
 }
 
-function toggleDone(idx) {
-  if (idx < 0 || idx >= quickNotes.length) return;
-  quickNotes[idx].done = !quickNotes[idx].done;
-  saveQuick();
-  // Aggiorna solo la card senza ricreare tutto
-  const item = document.querySelector('.note-item[data-idx="'+idx+'"]');
-  if (item) {
-    const box = item.querySelector('.check-box');
-    if (quickNotes[idx].done) {
-      item.classList.add('done');
-      box.classList.add('checked');
-    } else {
-      item.classList.remove('done');
-      box.classList.remove('checked');
-    }
+function toggleDone(key, idx) {
+  notes[key][idx].done = !notes[key][idx].done;
+  saveNotes(key);
+  // Aggiorna solo la card
+  const card = document.querySelector(`#list-${key} .note-card[data-idx="${idx}"]`);
+  if (card) {
+    const done = notes[key][idx].done;
+    card.classList.toggle('done', done);
+    card.querySelector('.check').classList.toggle('on', done);
   }
 }
 
-function renderQuick() {
-  const list = document.getElementById('quickList');
-  const empty = document.getElementById('quickEmpty');
+function editNote(key, idx) {
+  const newText = prompt('Modifica nota:', notes[key][idx].text);
+  if (newText !== null && newText.trim()) {
+    notes[key][idx].text = newText.trim();
+    saveNotes(key);
+    renderNotes(key);
+  }
+}
+
+function deleteNote(key, idx) {
+  notes[key].splice(idx, 1);
+  saveNotes(key);
+  renderNotes(key);
+}
+
+function archiveDone(key) {
+  const done = notes[key].filter(n => n.done);
+  if (!done.length) { toast('Nessuna nota completata da archiviare.'); return; }
+  done.forEach(n => archive.push({ text: n.text, type: key, date: new Date().toLocaleDateString('it-IT') }));
+  notes[key] = notes[key].filter(n => !n.done);
+  saveNotes(key);
+  saveArchive();
+  renderNotes(key);
+  renderArchive();
+  toast('🗂 '+done.length+' nota/e archiviate!');
+}
+
+function clearAll(key) {
+  if (!notes[key].length) return;
+  if (confirm('Svuotare tutte le note?')) {
+    notes[key] = [];
+    saveNotes(key);
+    renderNotes(key);
+  }
+}
+
+function renderNotes(key) {
+  const list = document.getElementById('list-'+key);
   list.innerHTML = '';
-  if (quickNotes.length === 0) {
-    list.appendChild(empty);
+  if (!notes[key].length) {
+    const e = document.createElement('div');
+    e.className = 'empty-state';
+    e.innerHTML = `<div class="empty-icon">${key==='work'?'⚡':'👤'}</div><div>Nessuna nota ${key==='work'?'di lavoro':'personale'}</div>`;
+    list.appendChild(e);
     return;
   }
-  quickNotes.forEach((note, i) => {
-    const item = document.createElement('div');
-    item.className = 'note-item' + (note.done ? ' done' : '');
-    item.dataset.idx = i;
+  notes[key].forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'note-card'+(n.done?' done':'');
+    card.dataset.idx = i;
+    // numero
     const num = document.createElement('span');
-    num.className = 'note-num';
-    num.textContent = (i+1) + '.';
+    num.className = 'note-n';
+    num.textContent = (i+1)+'.';
+    // testo
     const txt = document.createElement('span');
-    txt.className = 'note-text';
-    txt.textContent = note.text;
-    txt.addEventListener('click', () => editNote(i));
-    const wrap = document.createElement('div');
-    wrap.className = 'check-wrap';
-    const box = document.createElement('div');
-    box.className = 'check-box' + (note.done ? ' checked' : '');
-    wrap.appendChild(box);
-    wrap.addEventListener('click', () => toggleDone(i));
-    item.appendChild(num);
-    item.appendChild(txt);
-    item.appendChild(wrap);
-    list.appendChild(item);
+    txt.className = 'note-t';
+    txt.textContent = n.text;
+    txt.title = 'Tocca per modificare';
+    txt.addEventListener('click', () => editNote(key, i));
+    // checkbox
+    const chk = document.createElement('div');
+    chk.className = 'check'+(n.done?' on':'');
+    chk.addEventListener('click', () => toggleDone(key, i));
+    // elimina
+    const del = document.createElement('button');
+    del.className = 'note-del';
+    del.textContent = '✕';
+    del.title = 'Elimina';
+    del.addEventListener('click', () => {
+      if (confirm('Eliminare questa nota?')) deleteNote(key, i);
+    });
+    card.appendChild(num);
+    card.appendChild(txt);
+    card.appendChild(chk);
+    card.appendChild(del);
+    list.appendChild(card);
   });
-  list.scrollTop = list.scrollHeight;
 }
 
-function editNote(idx) {
-  const newText = prompt('Modifica nota:', quickNotes[idx].text);
-  if (newText !== null && newText.trim()) {
-    quickNotes[idx].text = newText.trim();
-    saveQuick();
-    renderQuick();
-  }
+function saveNotes(key) {
+  localStorage.setItem('av_notes_'+key, JSON.stringify(notes[key]));
 }
 
-function exportNotes() {
-  if (!quickNotes.length) { showToast('Nessuna nota da esportare.'); return; }
+function exportNotes(key) {
+  if (!notes[key].length) { toast('Nessuna nota da esportare.'); return; }
   const data = new Date().toLocaleDateString('it-IT');
-  const ora = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-  const righe = quickNotes.map((n, i) => `
-    <tr>
-      <td style="padding:8px 12px;font-weight:700;color:#888;font-size:14px">${i+1}.</td>
-      <td style="padding:8px 12px;font-size:15px;color:#222">${n.text}</td>
-      <td style="padding:8px 12px;text-align:center;font-size:18px">${n.done ? '🟢' : '⬜'}</td>
-    </tr>`).join('');
-  const html = `<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Note veloci — ${data}</title>
-<style>
-  body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#222}
-  h1{font-size:22px;margin-bottom:4px;color:#111}
-  .sub{font-size:13px;color:#888;margin-bottom:24px}
-  table{width:100%;border-collapse:collapse}
-  tr:nth-child(even){background:#f9f9f9}
-  tr{border-bottom:1px solid #eee}
-  .footer{margin-top:24px;font-size:12px;color:#aaa;text-align:center}
-</style>
-</head>
-<body>
-<h1>📋 Note veloci</h1>
-<div class="sub">Esportate il ${data} alle ${ora}</div>
-<table>
-  <tr style="background:#f0f0f0">
-    <th style="padding:8px 12px;text-align:left;font-size:13px">#</th>
-    <th style="padding:8px 12px;text-align:left;font-size:13px">Nota</th>
-    <th style="padding:8px 12px;font-size:13px">Fatto</th>
-  </tr>
-  ${righe}
-</table>
-<div class="footer">Generato da Appunti Vocali</div>
-</body>
-</html>`;
-  const blob = new Blob([html], {type: 'text/html'});
+  const ora = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  const tipo = key==='work' ? '⚡ Note di lavoro' : '👤 Note personali';
+  const righe = notes[key].map((n,i) => `<tr><td style="padding:8px 12px;color:#888;font-weight:700;font-size:13px">${i+1}.</td><td style="padding:8px 12px;font-size:14px">${n.text}</td><td style="padding:8px 12px;text-align:center;font-size:16px">${n.done?'🟢':'⬜'}</td></tr>`).join('');
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>${tipo} — ${data}</title>
+<style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px}h1{font-size:20px}.sub{font-size:12px;color:#999;margin-bottom:20px}table{width:100%;border-collapse:collapse}tr:nth-child(even){background:#f9f9f9}tr{border-bottom:1px solid #eee}th{padding:8px 12px;text-align:left;font-size:12px;background:#f0f0f0}.foot{margin-top:20px;font-size:11px;color:#bbb;text-align:center}</style>
+</head><body><h1>${tipo}</h1><div class="sub">Esportate il ${data} alle ${ora}</div>
+<table><tr><th>#</th><th>Nota</th><th>Fatto</th></tr>${righe}</table>
+<div class="foot">Generato da Appunti Vocali</div></body></html>`;
+  const blob = new Blob([html],{type:'text/html'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'note-veloci-' + data.replace(/\//g,'-') + '.html';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('📄 File scaricato!');
-}
-
-function clearAllNotes() {
-  if (!quickNotes.length) return;
-  if (confirm('Svuotare tutta la lista?')) {
-    quickNotes = [];
-    saveQuick();
-    renderQuick();
-  }
-}
-
-// ===== PERSONALE =====
-function setPreviewP(text, hasContent) {
-  const ta = document.getElementById('personalPreviewText');
-  if (text) ta.value = text;
-  document.getElementById('addBtnP').disabled = !(hasContent && text && text.trim().length > 0);
-}
-
-function clearPreviewP() {
-  document.getElementById('personalPreviewText').value = '';
-  document.getElementById('addBtnP').disabled = true;
-}
-
-function onPersonalInput() {
-  const val = document.getElementById('personalPreviewText').value.trim();
-  document.getElementById('addBtnP').disabled = !val;
-}
-
-function addNoteP() {
-  const text = document.getElementById('personalPreviewText').value.trim();
-  if (!text) return;
-  personalNotes.push({ text, done: false });
-  savePersonal();
-  renderPersonal();
-  clearPreviewP();
-}
-
-function toggleDoneP(idx) {
-  if (idx < 0 || idx >= personalNotes.length) return;
-  personalNotes[idx].done = !personalNotes[idx].done;
-  savePersonal();
-  const item = document.querySelector('#personalList .note-item[data-idx="'+idx+'"]');
-  if (item) {
-    const box = item.querySelector('.check-box');
-    if (personalNotes[idx].done) {
-      item.classList.add('done'); box.classList.add('checked');
-    } else {
-      item.classList.remove('done'); box.classList.remove('checked');
-    }
-  }
-}
-
-function editNoteP(idx) {
-  const newText = prompt('Modifica nota:', personalNotes[idx].text);
-  if (newText !== null && newText.trim()) {
-    personalNotes[idx].text = newText.trim();
-    savePersonal();
-    renderPersonal();
-  }
-}
-
-function renderPersonal() {
-  const list = document.getElementById('personalList');
-  const empty = document.getElementById('personalEmpty');
-  list.innerHTML = '';
-  if (personalNotes.length === 0) { list.appendChild(empty); return; }
-  personalNotes.forEach((note, i) => {
-    const item = document.createElement('div');
-    item.className = 'note-item' + (note.done ? ' done' : '');
-    item.dataset.idx = i;
-    const num = document.createElement('span');
-    num.className = 'note-num'; num.textContent = (i+1) + '.';
-    const txt = document.createElement('span');
-    txt.className = 'note-text'; txt.textContent = note.text;
-    txt.addEventListener('click', () => editNoteP(i));
-    const wrap = document.createElement('div');
-    wrap.className = 'check-wrap';
-    const box = document.createElement('div');
-    box.className = 'check-box' + (note.done ? ' checked' : '');
-    wrap.appendChild(box);
-    wrap.addEventListener('click', () => toggleDoneP(i));
-    item.appendChild(num); item.appendChild(txt); item.appendChild(wrap);
-    list.appendChild(item);
-  });
-  list.scrollTop = list.scrollHeight;
-}
-
-function exportNotesP() {
-  if (!personalNotes.length) { showToast('Nessuna nota da esportare.'); return; }
-  const data = new Date().toLocaleDateString('it-IT');
-  const ora = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-  const righe = personalNotes.map((n, i) => `
-    <tr>
-      <td style="padding:8px 12px;font-weight:700;color:#888;font-size:14px">${i+1}.</td>
-      <td style="padding:8px 12px;font-size:15px;color:#222">${n.text}</td>
-      <td style="padding:8px 12px;text-align:center;font-size:18px">${n.done ? '🟢' : '⬜'}</td>
-    </tr>`).join('');
-  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Note personali — ${data}</title>
-<style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px}h1{font-size:22px;color:#111}.sub{font-size:13px;color:#888;margin-bottom:24px}table{width:100%;border-collapse:collapse}tr:nth-child(even){background:#f9f9f9}tr{border-bottom:1px solid #eee}.footer{margin-top:24px;font-size:12px;color:#aaa;text-align:center}</style>
-</head><body><h1>👤 Note personali</h1><div class="sub">Esportate il ${data} alle ${ora}</div>
-<table><tr style="background:#f0f0f0"><th style="padding:8px 12px;text-align:left">#</th><th style="padding:8px 12px;text-align:left">Nota</th><th style="padding:8px 12px">Fatto</th></tr>${righe}</table>
-<div class="footer">Generato da Appunti Vocali</div></body></html>`;
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'note-personali-' + data.replace(/\//g,'-') + '.html';
+  a.href=url; a.download=`note-${key}-${data.replace(/\//g,'-')}.html`;
   a.click(); URL.revokeObjectURL(url);
-  showToast('📄 File scaricato!');
+  toast('📄 File scaricato!');
 }
 
-function clearAllNotesP() {
-  if (!personalNotes.length) return;
-  if (confirm('Svuotare le note personali?')) {
-    personalNotes = []; savePersonal(); renderPersonal();
+// ===== ARCHIVIO =====
+function renderArchive() {
+  const list = document.getElementById('archiveList');
+  list.innerHTML = '';
+  if (!archive.length) {
+    const e = document.createElement('div');
+    e.className = 'empty-state';
+    e.innerHTML = '<div class="empty-icon">🗂</div><div>Nessuna nota archiviata</div>';
+    list.appendChild(e);
+    return;
   }
+  archive.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'arch-card';
+    const badge = document.createElement('span');
+    badge.className = 'arch-badge '+(n.type==='work'?'work':'personal');
+    badge.textContent = n.type==='work'?'Lavoro':'Personale';
+    const txt = document.createElement('span');
+    txt.className = 'arch-text';
+    txt.textContent = n.text;
+    const del = document.createElement('button');
+    del.className = 'arch-del';
+    del.textContent = '✕';
+    del.addEventListener('click', () => { archive.splice(i,1); saveArchive(); renderArchive(); });
+    card.appendChild(badge); card.appendChild(txt); card.appendChild(del);
+    list.appendChild(card);
+  });
 }
 
-function savePersonal() { localStorage.setItem('av_personal', JSON.stringify(personalNotes)); }
-function loadPersonal() {
-  try { personalNotes = JSON.parse(localStorage.getItem('av_personal') || '[]'); }
-  catch(e) { personalNotes = []; }
-}
+function saveArchive() { localStorage.setItem('av_archive', JSON.stringify(archive)); }
 
-function saveQuick() {
-  localStorage.setItem('av_quick', JSON.stringify(quickNotes));
-}
-
-function loadQuick() {
-  try { quickNotes = JSON.parse(localStorage.getItem('av_quick') || '[]'); }
-  catch(e) { quickNotes = []; }
+function clearArchive() {
+  if (!archive.length) return;
+  if (confirm('Svuotare tutto l\'archivio?')) { archive=[]; saveArchive(); renderArchive(); }
 }
 
 // ===== UTILS =====
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-let toastTimer = null;
-function showToast(msg, duration = 2500) {
+let tt;
+function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+  clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2500);
 }
 
-// ===== INIT =====
-const savedNotes = localStorage.getItem('av_notes') || '';
-document.getElementById('notesText').value = savedNotes;
-document.getElementById('notesText').dataset.base = savedNotes;
-updateNotesCount();
-loadQuick();
-renderQuick();
-loadPersonal();
-renderPersonal();
-
-if (!hasSpeech) {
-  document.getElementById('notesMicBtn').style.display = 'none';
-  document.getElementById('quickMicBtn').style.display = 'none';
-  document.getElementById('personalMicBtn').style.display = 'none';
-}
+init();
 </script>
 </body>
 </html>
