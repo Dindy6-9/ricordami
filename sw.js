@@ -20,8 +20,8 @@ self.addEventListener('message', e => {
         requireInteraction: true,
         vibrate: [200, 100, 200],
         tag: 'reminder-' + id,
-        icon: 'https://dindy6-9.github.io/ricordami/icon.png',
-        badge: 'https://dindy6-9.github.io/ricordami/icon.png',
+        icon: 'icon-192.png',
+        badge: 'icon-192.png',
         data: { id, text }
       });
     }, delay);
@@ -35,6 +35,6 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(clients.matchAll({ type: 'window' }).then(list => {
     if (list.length > 0) return list[0].focus();
-    return clients.openWindow('https://dindy6-9.github.io/ricordami/promemoria-vocale.html');
+    return clients.openWindow('https://dindy6-9.github.io/ricordami/appunti-vocali.html');
   }));
 });
